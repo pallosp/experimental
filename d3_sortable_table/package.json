@@ -1,0 +1,24 @@
+{
+  "name": "d3_sortable_table",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/d3-array": "^3.2.1",
+    "@types/d3-dsv": "^3.0.7",
+    "@types/d3-fetch": "^3.0.7",
+    "@types/d3-selection": "^3.0.11",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.1"
+  },
+  "dependencies": {
+    "d3-array": "^3.2.4",
+    "d3-fetch": "^3.0.1",
+    "d3-selection": "^3.0.0"
+  }
+}

@@ -1,0 +1,44 @@
+table {
+  border-collapse: collapse;
+}
+
+thead tr {
+  border-bottom: 1px solid lightgrey;
+}
+
+th {
+  cursor: pointer;
+  padding: 4px 8px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+th:hover {
+  background: #eee;
+}
+
+th::after {
+  font-family: monospace;
+  margin-left: 8px;
+}
+
+th.unsorted::after {
+  content: '\00a0';
+}
+
+th.ascending::after {
+  content: '▲';
+}
+
+th.descending::after {
+  content: '▼';
+}
+
+td {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+tbody tr:first-child td {
+  padding-top: 4px;
+}
