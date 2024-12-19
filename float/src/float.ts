@@ -20,3 +20,19 @@ export function prevDouble(x: number): number {
   }
   return x > 0 ? Number.MAX_VALUE : NaN;
 }
+
+/** Returns the greatest possible float64 that is at most x+y. */
+export function sumLowerBound(x: number, y: number): number {
+  const sum = x + y;
+  if (!isFinite(x) || !isFinite(y)) return sum;
+  const d = sum - y;
+  return x - d + (d - sum + y) >= 0 ? sum : prevDouble(sum);
+}
+
+/** Returns the lowest possible float64 that is at least x+y. */
+export function sumUpperBound(x: number, y: number): number {
+  const sum = x + y;
+  if (!isFinite(x) || !isFinite(y)) return sum;
+  const d = sum - y;
+  return x - d + (d - sum + y) <= 0 ? sum : nextDouble(sum);
+}

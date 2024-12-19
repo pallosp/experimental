@@ -1,4 +1,4 @@
-import {nextDouble, prevDouble} from '../src/float'
+import {nextDouble, prevDouble, sumLowerBound, sumUpperBound} from '../src/float'
 
 const ATTEMPTS = 100;
 
@@ -110,4 +110,37 @@ test('previous/next double, near ∞', () => {
     expect(areNeighbors(x, nextDouble(x))).toBe(true);
     expect(areNeighbors(prevDouble(x), x)).toBe(true);
   }
+});
+
+test('sum, lower/upper bounds, non-finite', () => {
+  expect(sumLowerBound(Infinity, 1)).toBe(Infinity);
+  expect(sumUpperBound(Infinity, 1)).toBe(Infinity);
+  expect(sumLowerBound(Infinity, -Infinity)).toBe(NaN);
+  expect(sumUpperBound(Infinity, -Infinity)).toBe(NaN);
+  expect(sumLowerBound(3, NaN)).toBe(NaN);
+  expect(sumUpperBound(3, NaN)).toBe(NaN);
+});
+
+test('sum, lower/upper bounds, exact result', () => {
+  expect(sumLowerBound(1, 2)).toBe(3);
+  expect(sumUpperBound(1, 2)).toBe(3);
+  expect(sumLowerBound(0.25, 0.0625)).toBe(0.3125);
+  expect(sumUpperBound(0.25, 0.0625)).toBe(0.3125);
+});
+
+test('sum, lower/upper bounds, non-exact finite result', () => {
+  expect(sumLowerBound(0.1, 0.2)).toBe(0.3);
+  expect(sumUpperBound(0.1, 0.2)).toBe(nextDouble(0.3));
+  expect(sumLowerBound(4.2, 1e-20)).toBe(4.2);
+  expect(sumUpperBound(4.2, 1e-20)).toBe(nextDouble(4.2));
+  expect(sumLowerBound(4.2, -1e-20)).toBe(prevDouble(4.2));
+  expect(sumUpperBound(4.2, -1e-20)).toBe(4.2);
+  expect(sumLowerBound(1e-20, 4.2)).toBe(4.2);
+  expect(sumUpperBound(1e-20, 4.2)).toBe(nextDouble(4.2));
+  expect(sumLowerBound(-1e-20, 4.2)).toBe(prevDouble(4.2));
+  expect(sumUpperBound(-1e-20, 4.2)).toBe(4.2);
+  expect(sumLowerBound(Number.MAX_SAFE_INTEGER, 2))
+      .toBe(Number.MAX_SAFE_INTEGER + 1);
+  expect(sumUpperBound(Number.MAX_SAFE_INTEGER, 2))
+      .toBe(Number.MAX_SAFE_INTEGER + 3);
 });
