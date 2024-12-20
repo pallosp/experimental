@@ -196,6 +196,14 @@ test('sum, lower/upper bounds, non-exact finite result', () => {
       .toBe(Number.MAX_SAFE_INTEGER + 3);
 });
 
+test('sum, lower/upper bounds, near ∞', () => {
+  expect(sumLowerBound(Number.MAX_VALUE, Number.MAX_VALUE))
+      .toBe(Number.MAX_VALUE);
+  expect(sumUpperBound(Number.MAX_VALUE, Number.MAX_VALUE)).toBe(Infinity);
+  expect(sumLowerBound(Number.MAX_VALUE, -Number.MAX_VALUE)).toBe(0);
+  expect(sumUpperBound(Number.MAX_VALUE, -Number.MAX_VALUE)).toBe(0);
+});
+
 test('sum, lower/upper bounds, commutative', () => {
   for (let i = 0; i < ATTEMPTS; i++) {
     const a = Math.floor(Math.random() * 100) / 100;
