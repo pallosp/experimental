@@ -204,3 +204,14 @@ test('sum, lower/upper bounds, commutative', () => {
     expect(sumUpperBound(a, b)).toBe(sumUpperBound(b, a));
   }
 });
+
+test('sum, lower/upper bounds, exactness', () => {
+  for (let i = 0; i < ATTEMPTS; i++) {
+    const a = 1 / Math.random() * (Math.random() < 0.5 ? 1 : -1);
+    const b = 1 / Math.random() * (Math.random() < 0.5 ? 1 : -1);
+    const lsb1 = lsbExp(a);
+    const lsb2 = lsbExp(b);
+    const isSumExact = lsb1 === lsb2 || lsbExp(a + b) === Math.min(lsb1, lsb2);
+    expect(sumLowerBound(a, b) === sumUpperBound(a, b)).toBe(isSumExact);
+  }
+});
