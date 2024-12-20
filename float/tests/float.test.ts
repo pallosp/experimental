@@ -202,6 +202,9 @@ test('sum, lower/upper bounds, near ∞', () => {
   expect(sumUpperBound(Number.MAX_VALUE, Number.MAX_VALUE)).toBe(Infinity);
   expect(sumLowerBound(Number.MAX_VALUE, -Number.MAX_VALUE)).toBe(0);
   expect(sumUpperBound(Number.MAX_VALUE, -Number.MAX_VALUE)).toBe(0);
+  expect(sumLowerBound(-Number.MAX_VALUE, -Number.MAX_VALUE)).toBe(-Infinity);
+  expect(sumUpperBound(-Number.MAX_VALUE, -Number.MAX_VALUE))
+      .toBe(-Number.MAX_VALUE);
 });
 
 test('sum, lower/upper bounds, commutative', () => {
