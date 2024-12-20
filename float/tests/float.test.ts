@@ -1,3 +1,5 @@
+import {expect, test} from '@jest/globals'
+
 import {nextDouble, prevDouble, sumLowerBound, sumUpperBound} from '../src/float'
 
 const ATTEMPTS = 100;
