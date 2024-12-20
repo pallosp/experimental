@@ -215,3 +215,12 @@ test('sum, lower/upper bounds, exactness', () => {
     expect(sumLowerBound(a, b) === sumUpperBound(a, b)).toBe(isSumExact);
   }
 });
+
+test('sum, lower/upper bounds, exactness v2', () => {
+  for (let i = 0; i < ATTEMPTS; i++) {
+    const a = 1 / Math.random() * (Math.random() < 0.5 ? 1 : -1);
+    const b = 1 / Math.random() * (Math.random() < 0.5 ? 1 : -1);
+    const isSumExact = (a + b) - a === b && (a + b) - b === a;
+    expect(sumLowerBound(a, b) === sumUpperBound(a, b)).toBe(isSumExact);
+  }
+});
