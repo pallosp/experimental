@@ -146,3 +146,12 @@ test('sum, lower/upper bounds, non-exact finite result', () => {
   expect(sumUpperBound(Number.MAX_SAFE_INTEGER, 2))
       .toBe(Number.MAX_SAFE_INTEGER + 3);
 });
+
+test('sum, lower/upper bounds, commutative', () => {
+  for (let i = 0; i < ATTEMPTS; i++) {
+    const a = Math.floor(Math.random() * 100) / 100;
+    const b = Math.floor(Math.random() * 100) / 100;
+    expect(sumLowerBound(a, b)).toBe(sumLowerBound(b, a));
+    expect(sumUpperBound(a, b)).toBe(sumUpperBound(b, a));
+  }
+});
