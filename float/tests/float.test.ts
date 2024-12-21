@@ -11,6 +11,14 @@ function areNeighbors(x: number, y: number): boolean {
   return x < y && x === avg || y === avg;
 }
 
+function randomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function randomSign(): number {
+  return Math.random() < 0.5 ? -1 : 1;
+}
+
 test('exponent of most significant bit', () => {
   expect(msbExp(1)).toBe(0);
   expect(msbExp(1.1)).toBe(0);
@@ -165,8 +173,8 @@ test('previous/next double, near ∞', () => {
 
 test('additive error tracking is consistent', () => {
   for (let i = 0; i < ATTEMPTS; i++) {
-    const a = 1 / Math.random() * (Math.random() < 0.5 ? 1 : -1);
-    const b = 1 / Math.random() * (Math.random() < 0.5 ? 1 : -1);
+    const a = 1 / Math.random() * randomSign();
+    const b = 1 / Math.random() * randomSign();
     const sum = a + b;
     expect((sum - a - b) * (sum - b - a)).toBeGreaterThanOrEqual(0);
   }
@@ -218,8 +226,8 @@ test('sum, lower/upper bounds, near ∞', () => {
 
 test('sum, lower/upper bounds, commutative', () => {
   for (let i = 0; i < ATTEMPTS; i++) {
-    const a = Math.floor(Math.random() * 100) / 100;
-    const b = Math.floor(Math.random() * 100) / 100;
+    const a = randomInt(0, 99) / 100;
+    const b = randomInt(0, 99) / 100;
     expect(sumLowerBound(a, b)).toBe(sumLowerBound(b, a));
     expect(sumUpperBound(a, b)).toBe(sumUpperBound(b, a));
   }
@@ -227,8 +235,8 @@ test('sum, lower/upper bounds, commutative', () => {
 
 test('sum, lower/upper bounds, exactness', () => {
   for (let i = 0; i < ATTEMPTS; i++) {
-    const a = 1 / Math.random() * (Math.random() < 0.5 ? 1 : -1);
-    const b = 1 / Math.random() * (Math.random() < 0.5 ? 1 : -1);
+    const a = 1 / Math.random() * randomSign();
+    const b = 1 / Math.random() * randomSign();
     const lsb1 = lsbExp(a);
     const lsb2 = lsbExp(b);
     const isSumExact = lsb1 === lsb2 || lsbExp(a + b) === Math.min(lsb1, lsb2);
@@ -238,8 +246,8 @@ test('sum, lower/upper bounds, exactness', () => {
 
 test('sum, lower/upper bounds, exactness v2', () => {
   for (let i = 0; i < ATTEMPTS; i++) {
-    const a = 1 / Math.random() * (Math.random() < 0.5 ? 1 : -1);
-    const b = 1 / Math.random() * (Math.random() < 0.5 ? 1 : -1);
+    const a = 1 / Math.random() * randomSign();
+    const b = 1 / Math.random() * randomSign();
     const isSumExact = (a + b) - a === b && (a + b) - b === a;
     expect(sumLowerBound(a, b) === sumUpperBound(a, b)).toBe(isSumExact);
   }
@@ -247,8 +255,8 @@ test('sum, lower/upper bounds, exactness v2', () => {
 
 test('multiplicative error tracking is consistent', () => {
   for (let i = 0; i < ATTEMPTS; i++) {
-    const a = 1 / Math.random() * (Math.random() < 0.5 ? 1 : -1);
-    const b = 1 / Math.random() * (Math.random() < 0.5 ? 1 : -1);
+    const a = 1 / Math.random() * randomSign();
+    const b = 1 / Math.random() * randomSign();
     const p = a * b;
     expect((p / a / b - 1) * (p / b / a - 1)).toBeGreaterThanOrEqual(0);
   }
