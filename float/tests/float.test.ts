@@ -1,6 +1,8 @@
-import {expect, test} from '@jest/globals'
+import {expect, test} from '@jest/globals';
 
-import {lsbExp, msbExp, mulLowerBound, mulUpperBound, nextDouble, prevDouble, sumLowerBound, sumUpperBound} from '../src/float'
+import {lsbExp, msbExp, mulLowerBound, mulUpperBound, nextDouble, prevDouble, sumLowerBound, sumUpperBound} from '../src/float';
+
+import {randomInt, randomSign} from './random';
 
 const ATTEMPTS = 100;
 
@@ -9,14 +11,6 @@ function areNeighbors(x: number, y: number): boolean {
   if (y === Infinity) return x === Number.MAX_VALUE;
   const avg = x + (y - x) / 2;
   return x < y && x === avg || y === avg;
-}
-
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min)) + min;
-}
-
-function randomSign(): number {
-  return Math.random() < 0.5 ? -1 : 1;
 }
 
 test('exponent of most significant bit', () => {
