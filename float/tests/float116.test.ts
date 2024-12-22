@@ -129,9 +129,8 @@ function mulDD(x: number, y: number): Float116 {
 
 test('mulDD', () => {
   for (let i = 0; i < ATTEMPTS; i++) {
-    // 105 bits precision is guaranteed.
-    const x = randomInt(0, 2 ** 53 - 1) * 2 ** randomInt(0, 80);
-    const y = randomInt(0, 2 ** 52 - 1) * 2 ** randomInt(0, 80);
+    const x = randomSign() * randomInt(0, 2 ** 53 - 1) * 2 ** randomInt(0, 80);
+    const y = randomSign() * randomInt(0, 2 ** 53 - 1) * 2 ** randomInt(0, 80);
     const p = mulDD(x, y);
     expect(BigInt(x) * BigInt(y)).toEqual(BigInt(p.hi) + BigInt(p.lo));
   }
