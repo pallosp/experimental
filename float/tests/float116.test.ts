@@ -124,7 +124,7 @@ function mulDD(x: number, y: number): Float116 {
   p = xh * yh;
   const q = xh * yl + xl * yh;
   const s = p + q;
-  return {hi: s, lo: p - s + q + xl * yl};
+  return addDD(s, p - s + q + xl * yl);
 }
 
 test('mulDD, float64', () => {
@@ -134,6 +134,7 @@ test('mulDD, float64', () => {
     const p = mulDD(x, y);
     expect(p.hi + p.lo).toBe(x * y);
     if (p.lo !== 0) expect(lsbExp(p.lo)).toBe(lsbExp(x) + lsbExp(y));
+    expect(p.hi).toBe(x * y);
   }
 });
 
@@ -143,6 +144,7 @@ test('mulDD, integer', () => {
     const y = randomSign() * randomInt(0, 2 ** 53 - 1) * 2 ** randomInt(0, 80);
     const p = mulDD(x, y);
     expect(BigInt(p.hi) + BigInt(p.lo)).toEqual(BigInt(x) * BigInt(y));
+    expect(p.hi).toBe(x * y);
   }
 });
 
