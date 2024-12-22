@@ -17,7 +17,7 @@ function addDD(x: number, y: number): Float116 {
   return {hi: sum, lo: x - x1 + (x1 - sum + y)};
 }
 
-test('addDD', () => {
+test('addDD, float64s', () => {
   for (let i = 0; i < ATTEMPTS; i++) {
     const x = Math.random() * randomSign() * 2 ** randomInt(-40, 40);
     const y = Math.random() * randomSign() * 2 ** randomInt(-40, 40);
@@ -33,6 +33,18 @@ test('addDD', () => {
       expect(Math.abs(sum.lo)).not.toBe(0);
       expect(lsbExp(sum.lo)).toBe(Math.min(lsb1, lsb2));
     }
+    if (sum.hi !== 0) expect(msbExp(sum.lo)).toBeLessThan(msbExp(sum.hi));
+  }
+});
+
+test('addDD, integers', () => {
+  const MAXINT = Number.MAX_SAFE_INTEGER;
+  for (let i = 0; i < ATTEMPTS; i++) {
+    const x = randomSign() * randomInt(0, MAXINT) * 2 ** randomInt(0, 80);
+    const y = randomSign() * randomInt(0, MAXINT) * 2 ** randomInt(0, 80);
+    const sum = addDD(x, y);
+    expect(BigInt(sum.hi) + BigInt(sum.lo)).toEqual(BigInt(x) + BigInt(y));
+    if (sum.hi !== 0) expect(msbExp(sum.lo)).toBeLessThan(msbExp(sum.hi));
   }
 });
 
