@@ -127,7 +127,17 @@ function mulDD(x: number, y: number): Float116 {
   return {hi: s, lo: p - s + q + xl * yl};
 }
 
-test('mulDD', () => {
+test('mulDD, float64', () => {
+  for (let i = 0; i < ATTEMPTS; i++) {
+    const x = 1 / Math.random();
+    const y = 1 / Math.random();
+    const p = mulDD(x, y);
+    expect(p.hi + p.lo).toBe(x * y);
+    if (p.lo !== 0) expect(lsbExp(p.lo)).toBe(lsbExp(x) + lsbExp(y));
+  }
+});
+
+test('mulDD, integer', () => {
   for (let i = 0; i < ATTEMPTS; i++) {
     const x = randomSign() * randomInt(0, 2 ** 53 - 1) * 2 ** randomInt(0, 80);
     const y = randomSign() * randomInt(0, 2 ** 53 - 1) * 2 ** randomInt(0, 80);
