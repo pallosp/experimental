@@ -148,13 +148,14 @@ function mulDD2(x: number, y: number): Float116 {
   const lsbX = lsbExp(x);
   const msbX = msbExp(x);
   f64[0] = x;
-  halves[1] = (halves[1] & 0x800fffff) | ((1023 + msbX - lsbX) << 20);
+
+  halves[1] = halves[1] & 0x800fffff | ((1023 + msbX - lsbX) << 20);
   x = f64[0];
 
   const lsbY = lsbExp(y);
   const msbY = msbExp(y);
   f64[0] = y;
-  halves[1] = (halves[1] & 0x800fffff) | ((1023 + msbY - lsbY) << 20);
+  halves[1] = halves[1] & 0x800fffff | ((1023 + msbY - lsbY) << 20);
   y = f64[0];
 
   const p1 = BigInt(x) * BigInt(y);
@@ -171,4 +172,22 @@ test('mulDD2', () => {
     expect(p.hi + p.lo).toEqual(x * y);
     expect(BigInt(p.hi) + BigInt(p.lo)).toEqual(BigInt(x) * BigInt(y));
   }
+});
+
+test('mulDD vs mulDD2 benchmark', () => {
+  let start = performance.now();
+  for (let i = 0; i < 10000; i++) {
+    mulDD(Number.MAX_SAFE_INTEGER - i, Number.MAX_SAFE_INTEGER - i);
+  }
+  console.debug(
+      'high precision float64 multiplication, by splitting',
+      (performance.now() - start).toFixed(1), 'ms');
+
+  start = performance.now();
+  for (let i = 0; i < 10000; i++) {
+    mulDD2(Number.MAX_SAFE_INTEGER - i, Number.MAX_SAFE_INTEGER - i);
+  }
+  console.debug(
+      'high precision float64 multiplication, bigint based',
+      (performance.now() - start).toFixed(1), 'ms');
 });
