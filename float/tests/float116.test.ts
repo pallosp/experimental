@@ -132,7 +132,7 @@ test('mulDD', () => {
     const x = randomSign() * randomInt(0, 2 ** 53 - 1) * 2 ** randomInt(0, 80);
     const y = randomSign() * randomInt(0, 2 ** 53 - 1) * 2 ** randomInt(0, 80);
     const p = mulDD(x, y);
-    expect(BigInt(x) * BigInt(y)).toEqual(BigInt(p.hi) + BigInt(p.lo));
+    expect(BigInt(p.hi) + BigInt(p.lo)).toEqual(BigInt(x) * BigInt(y));
   }
 });
 
