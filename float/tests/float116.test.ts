@@ -136,3 +136,39 @@ test('mulDD', () => {
     expect(BigInt(x) * BigInt(y)).toEqual(BigInt(p.hi) + BigInt(p.lo));
   }
 });
+
+const f64 = new Float64Array([0]);
+const halves = new Uint32Array(f64.buffer);
+const MAXINT = BigInt(2 ** 53);
+
+function mulDD2(x: number, y: number): Float116 {
+  if (x === 0 || y === 0 || !isFinite(x) || !isFinite(y))
+    return {hi: x * y, lo: 0};
+
+  const lsbX = lsbExp(x);
+  const msbX = msbExp(x);
+  f64[0] = x;
+  halves[1] = (halves[1] & 0x800fffff) | ((1023 + msbX - lsbX) << 20);
+  x = f64[0];
+
+  const lsbY = lsbExp(y);
+  const msbY = msbExp(y);
+  f64[0] = y;
+  halves[1] = (halves[1] & 0x800fffff) | ((1023 + msbY - lsbY) << 20);
+  y = f64[0];
+
+  const p1 = BigInt(x) * BigInt(y);
+  const m = 2 ** (lsbX + lsbY);
+  const lo = p1 % MAXINT;
+  return {hi: Number(p1 - lo) * m, lo: Number(lo) * m};
+}
+
+test('mulDD2', () => {
+  for (let i = 0; i < ATTEMPTS; i++) {
+    const x = randomInt(0, 2 ** 53 - 1) * 2 ** randomInt(0, 80);
+    const y = randomInt(0, 2 ** 53 - 1) * 2 ** randomInt(0, 80);
+    const p = mulDD2(x, y);
+    expect(p.hi + p.lo).toEqual(x * y);
+    expect(BigInt(p.hi) + BigInt(p.lo)).toEqual(BigInt(x) * BigInt(y));
+  }
+});
