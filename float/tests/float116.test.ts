@@ -148,6 +148,18 @@ test('mulDD, integer', () => {
   }
 });
 
+test('mulDD, normalization', () => {
+  for (let i = 0; i < ATTEMPTS; i++) {
+    const x = randomSign() * Math.floor(2 ** Math.random() * 53) *
+        (2 ** randomInt(-5, 5));
+    const y = randomSign() * Math.floor(2 ** Math.random() * 53) *
+        (2 ** randomInt(-5, 5));
+    const p = mulDD(x, y);
+    const productFitsInFloat64 = lsbExp(x * y) === lsbExp(x) + lsbExp(y);
+    expect(p.lo === 0).toBe(productFitsInFloat64);
+  }
+});
+
 const f64 = new Float64Array([0]);
 const halves = new Uint32Array(f64.buffer);
 const MAXINT = BigInt(2 ** 53);
