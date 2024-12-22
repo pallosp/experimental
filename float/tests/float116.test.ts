@@ -33,18 +33,46 @@ test('addDD, float64s', () => {
       expect(Math.abs(sum.lo)).not.toBe(0);
       expect(lsbExp(sum.lo)).toBe(Math.min(lsb1, lsb2));
     }
-    if (sum.hi !== 0) expect(msbExp(sum.lo)).toBeLessThan(msbExp(sum.hi));
+    if (sum.hi !== 0) expect(msbExp(sum.lo)).toBeLessThan(lsbExp(sum.hi));
   }
 });
 
 test('addDD, integers', () => {
+  expect(addDD(1, 2)).toEqual({hi: 3, lo: 0});
+
   const MAXINT = Number.MAX_SAFE_INTEGER;
+  const maxQ = addDD(MAXINT * 2 ** 53, MAXINT);
+  expect(BigInt(maxQ.hi) + BigInt(maxQ.lo))
+      .toEqual(BigInt(MAXINT * 2 ** 53) + BigInt(MAXINT));
+
   for (let i = 0; i < ATTEMPTS; i++) {
     const x = randomSign() * randomInt(0, MAXINT) * 2 ** randomInt(0, 80);
     const y = randomSign() * randomInt(0, MAXINT) * 2 ** randomInt(0, 80);
     const sum = addDD(x, y);
     expect(BigInt(sum.hi) + BigInt(sum.lo)).toEqual(BigInt(x) + BigInt(y));
-    if (sum.hi !== 0) expect(msbExp(sum.lo)).toBeLessThan(msbExp(sum.hi));
+    if (sum.hi !== 0) expect(msbExp(sum.lo)).toBeLessThan(lsbExp(sum.hi));
+  }
+});
+
+function addQD(x: Float116, y: number): Float116 {
+  const s = addDD(x.hi, y);
+  s.lo += x.lo;
+  const hi = s.hi + s.lo;
+  return {hi, lo: s.hi - hi + s.lo};
+}
+
+test('addQD', () => {
+  expect(addQD({hi: 3, lo: 2}, 1)).toEqual({hi: 6, lo: 0});
+  // Only 105 binary digit precision is guaranteed
+  expect(addQD({hi: 2 ** 105, lo: 2 ** 52 + 1}, 2 ** 52))
+      .toEqual({hi: 2 ** 105 + 2 ** 53, lo: 0});
+  for (let i = 0; i < ATTEMPTS; i++) {
+    const lo = randomInt(0, 2 ** 53 - 1);
+    const hi = randomInt(0, 2 ** 52 - 1) * 2 ** 53;
+    const x = randomInt(0, 2 ** 53 - 1) * 2 ** randomInt(0, 52);
+    const sum = addQD({hi, lo}, x);
+    expect(BigInt(sum.hi) + BigInt(sum.lo))
+        .toEqual(BigInt(hi) + BigInt(lo) + BigInt(x));
   }
 });
 
@@ -71,7 +99,6 @@ function isWellSplit(x: number) {
 }
 
 test('splitD', () => {
-  console.log(splitD(Number.MAX_SAFE_INTEGER));
   expect(isWellSplit(0)).toBe(true);
   for (const exp of [26, 27, 28, 52, 53]) {
     expect(isWellSplit(2 ** exp - 1)).toBe(true);
