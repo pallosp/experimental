@@ -68,7 +68,7 @@ test('addQD', () => {
       .toEqual({hi: 2 ** 105 + 2 ** 53, lo: 0});
   for (let i = 0; i < ATTEMPTS; i++) {
     const lo = randomInt(0, 2 ** 52 - 1);
-    const hi = randomInt(0, 2 ** 53 - 1) * 2 ** 53;
+    const hi = randomInt(0, 2 ** 53 - 1) * 2 ** 52;
     const x = randomInt(0, 2 ** 53 - 1) * 2 ** randomInt(0, 52);
     const sum = addQD({hi, lo}, x);
     expect(BigInt(sum.hi) + BigInt(sum.lo))
@@ -148,7 +148,6 @@ function mulDD2(x: number, y: number): Float116 {
   const lsbX = lsbExp(x);
   const msbX = msbExp(x);
   f64[0] = x;
-
   halves[1] = halves[1] & 0x800fffff | ((1023 + msbX - lsbX) << 20);
   x = f64[0];
 
