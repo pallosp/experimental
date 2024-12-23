@@ -2,53 +2,11 @@ import {expect, test} from '@jest/globals';
 
 import {lsbExp, msbExp} from '../src/bits';
 import {Float116} from '../src/float116';
+import {addDD} from '../src/sum';
 
 import {randomInt, randomSign} from './random';
 
 const ATTEMPTS = 100;
-
-function addDD(x: number, y: number): Float116 {
-  const sum = x + y;
-  const x1 = sum - y;
-  return {hi: sum, lo: x - x1 + (x1 - sum + y)};
-}
-
-test('addDD, float64s', () => {
-  for (let i = 0; i < ATTEMPTS; i++) {
-    const x = Math.random() * randomSign() * 2 ** randomInt(-40, 40);
-    const y = Math.random() * randomSign() * 2 ** randomInt(-40, 40);
-    const sum = addDD(x, y);
-    expect(sum.hi).toBe(x + y);
-    expect(sum.hi + sum.lo).toBe(x + y);
-    const lsb1 = lsbExp(x);
-    const lsb2 = lsbExp(y);
-    const isSumExact = lsb1 === lsb2 || lsbExp(x + y) === Math.min(lsb1, lsb2);
-    if (isSumExact) {
-      expect(Math.abs(sum.lo)).toBe(0);
-    } else if (lsb1 !== lsb2) {
-      expect(Math.abs(sum.lo)).not.toBe(0);
-      expect(lsbExp(sum.lo)).toBe(Math.min(lsb1, lsb2));
-    }
-    if (sum.hi !== 0) expect(msbExp(sum.lo)).toBeLessThan(lsbExp(sum.hi));
-  }
-});
-
-test('addDD, integers', () => {
-  expect(addDD(1, 2)).toEqual({hi: 3, lo: 0});
-
-  const MAXINT = Number.MAX_SAFE_INTEGER;
-  const maxQ = addDD(MAXINT * 2 ** 53, MAXINT);
-  expect(BigInt(maxQ.hi) + BigInt(maxQ.lo))
-      .toEqual(BigInt(MAXINT * 2 ** 53) + BigInt(MAXINT));
-
-  for (let i = 0; i < ATTEMPTS; i++) {
-    const x = randomSign() * randomInt(0, MAXINT) * 2 ** randomInt(0, 80);
-    const y = randomSign() * randomInt(0, MAXINT) * 2 ** randomInt(0, 80);
-    const sum = addDD(x, y);
-    expect(BigInt(sum.hi) + BigInt(sum.lo)).toEqual(BigInt(x) + BigInt(y));
-    if (sum.hi !== 0) expect(msbExp(sum.lo)).toBeLessThan(lsbExp(sum.hi));
-  }
-});
 
 function addQD(x: Float116, y: number): Float116 {
   const s = addDD(x.hi, y);

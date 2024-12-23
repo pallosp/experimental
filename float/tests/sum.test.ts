@@ -1,8 +1,8 @@
 import {expect, test} from '@jest/globals';
 
-import {lsbExp} from '../src/bits';
+import {lsbExp, msbExp} from '../src/bits';
 import {nextDouble, prevDouble} from '../src/enumerate';
-import {isSumExact, sumLowerBound, sumUpperBound} from '../src/sum';
+import {addDD, isSumExact, sumLowerBound, sumUpperBound} from '../src/sum';
 
 import {randomInt, randomSign} from './random';
 
@@ -86,5 +86,39 @@ test('sumLowerBound/sumUpperBound, consistent with isSumExact', () => {
     const a = randomSign() / Math.random();
     const b = randomSign() / Math.random();
     expect(sumLowerBound(a, b) === sumUpperBound(a, b)).toBe(isSumExact(a, b));
+  }
+});
+
+test('addDD, float64s', () => {
+  for (let i = 0; i < ATTEMPTS; i++) {
+    const x = randomSign() * 2 ** randomInt(-40, 40) * Math.random();
+    const y = randomSign() * 2 ** randomInt(-40, 40) * Math.random();
+    const sum = addDD(x, y);
+    expect(sum.hi).toBe(x + y);
+    expect(sum.hi + sum.lo).toBe(x + y);
+    if (isSumExact(x, y)) {
+      expect(Math.abs(sum.lo)).toBe(0);
+    } else {
+      expect(Math.abs(sum.lo)).not.toBe(0);
+      expect(lsbExp(sum.lo)).toBe(Math.min(lsbExp(x), lsbExp(y)));
+    }
+    if (sum.hi !== 0) expect(msbExp(sum.lo)).toBeLessThan(lsbExp(sum.hi));
+  }
+});
+
+test('addDD, integers', () => {
+  expect(addDD(1, 2)).toEqual({hi: 3, lo: 0});
+
+  const MAXINT = Number.MAX_SAFE_INTEGER;
+  const maxQ = addDD(MAXINT * 2 ** 53, MAXINT);
+  expect(BigInt(maxQ.hi) + BigInt(maxQ.lo))
+      .toEqual(BigInt(MAXINT * 2 ** 53) + BigInt(MAXINT));
+
+  for (let i = 0; i < ATTEMPTS; i++) {
+    const x = randomSign() * 2 ** randomInt(0, 80) * randomInt(0, MAXINT);
+    const y = randomSign() * 2 ** randomInt(0, 80) * randomInt(0, MAXINT);
+    const sum = addDD(x, y);
+    expect(BigInt(sum.hi) + BigInt(sum.lo)).toEqual(BigInt(x) + BigInt(y));
+    if (sum.hi !== 0) expect(msbExp(sum.lo)).toBeLessThan(lsbExp(sum.hi));
   }
 });
