@@ -1,19 +1,5 @@
 import {nextDouble, prevDouble} from '../src/enumerate';
 
-/** Returns the greatest possible float64 that is at most x+y. */
-export function sumLowerBound(x: number, y: number): number {
-  const sum = x + y;
-  if (!isFinite(x) || !isFinite(y)) return sum;
-  return (sum - x - y) + (sum - y - x) <= 0 ? sum : prevDouble(sum);
-}
-
-/** Returns the lowest possible float64 that is at least x+y. */
-export function sumUpperBound(x: number, y: number): number {
-  const sum = x + y;
-  if (!isFinite(x) || !isFinite(y)) return sum;
-  return (sum - x - y) + (sum - y - x) >= 0 ? sum : nextDouble(sum);
-}
-
 /** Returns the greatest possible float64 that is at most x*y. */
 export function mulLowerBound(x: number, y: number): number {
   const p = x * y;
