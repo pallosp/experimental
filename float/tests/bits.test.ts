@@ -1,7 +1,7 @@
 import {expect, test} from '@jest/globals';
 
 import {lsbExp, msbExp} from '../src/bits';
-import {prevDouble} from '../src/float';
+import {prevDouble} from '../src/enumerate';
 
 const ATTEMPTS = 100;
 
