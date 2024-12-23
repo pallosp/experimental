@@ -8,8 +8,6 @@ import {randomInt, randomSign} from './random';
 
 const ATTEMPTS = 100;
 
-
-
 test('additive error tracking is consistent', () => {
   for (let i = 0; i < ATTEMPTS; i++) {
     const a = 1 / Math.random() * randomSign();
@@ -79,15 +77,6 @@ test('sum, lower/upper bounds, exactness', () => {
     const lsb1 = lsbExp(a);
     const lsb2 = lsbExp(b);
     const isSumExact = lsb1 === lsb2 || lsbExp(a + b) === Math.min(lsb1, lsb2);
-    expect(sumLowerBound(a, b) === sumUpperBound(a, b)).toBe(isSumExact);
-  }
-});
-
-test('sum, lower/upper bounds, exactness v2', () => {
-  for (let i = 0; i < ATTEMPTS; i++) {
-    const a = 1 / Math.random() * randomSign();
-    const b = 1 / Math.random() * randomSign();
-    const isSumExact = (a + b) - a === b && (a + b) - b === a;
     expect(sumLowerBound(a, b) === sumUpperBound(a, b)).toBe(isSumExact);
   }
 });
