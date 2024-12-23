@@ -1,6 +1,6 @@
 import {expect, test} from '@jest/globals';
 
-import {lsbExp, msbExp} from '../src/float';
+import {lsbExp, msbExp} from '../src/bits';
 
 import {randomInt, randomSign} from './random';
 
