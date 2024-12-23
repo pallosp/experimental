@@ -1,6 +1,6 @@
 import {expect, test} from '@jest/globals';
 
-import {lsbExp, msbExp} from '../src/bits';
+import {lsbExp, msbExp, significantBits} from '../src/bits';
 import {prevDouble} from '../src/enumerate';
 
 const ATTEMPTS = 100;
@@ -52,4 +52,17 @@ test('exponent of least significant bit', () => {
   expect(lsbExp(Infinity)).toBe(Infinity);
   expect(lsbExp(-Infinity)).toBe(Infinity);
   expect(lsbExp(NaN)).toBe(NaN);
+});
+
+test('significantBits', () => {
+  expect(significantBits(0)).toBe(0);
+  expect(significantBits(1)).toBe(1);
+  expect(significantBits(-6)).toBe(2);
+  expect(significantBits(2 ** 53)).toBe(1);
+  expect(significantBits(2 ** 53 - 1)).toBe(53);
+  expect(significantBits(Number.MAX_VALUE)).toBe(53);
+  expect(significantBits(Number.MIN_VALUE)).toBe(1);
+  expect(significantBits(Infinity)).toBe(NaN);
+  expect(significantBits(-Infinity)).toBe(NaN);
+  expect(significantBits(NaN)).toBe(NaN);
 });

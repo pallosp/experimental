@@ -37,3 +37,11 @@ export function lsbExp(x: number): number {
   return rawExp + +(rawExp === 0) - 1075 +
       (halves[0] === 0 ? crz32(halves[1] | 0x100000) + 32 : crz32(halves[0]))
 }
+
+/**
+ * Number of bits in the significand of x from the first to the last 1,
+ * inclusive. NaN if x is ±∞ or NaN.
+ */
+export function significantBits(x: number): number {
+  return x === 0 ? 0 : msbExp(x) - lsbExp(x) + 1;
+}
