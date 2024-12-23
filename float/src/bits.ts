@@ -41,7 +41,20 @@ export function lsbExp(x: number): number {
 /**
  * Number of bits in the significand of x from the first to the last 1,
  * inclusive. NaN if x is ±∞ or NaN.
+ *
+ * Equals to msbExp(x)-lsbExp(x)+1 for non-zero finite numbers.
  */
 export function significantBits(x: number): number {
-  return x === 0 ? 0 : msbExp(x) - lsbExp(x) + 1;
+  if (!isFinite(x)) return NaN;
+  f64[0] = x;
+  const l = halves[0];
+  if (halves[1] & 0x7FF00000) {
+    // raw exponent > 0 => normal number
+    return l !== 0 ? 53 - crz32(l) : 21 - crz32(halves[1] | 0x100000);
+  }
+  // subnormal number
+  const h = halves[1] & 0xFFFFF;
+  return h !== 0 ? (l !== 0 ? 64 - Math.clz32(h) - crz32(l) :
+                              32 - Math.clz32(h) - crz32(h)) :
+                   (l !== 0 ? 32 - Math.clz32(l) - crz32(l) : 0);
 }

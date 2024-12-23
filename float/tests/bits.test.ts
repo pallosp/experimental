@@ -3,6 +3,8 @@ import {expect, test} from '@jest/globals';
 import {lsbExp, msbExp, significantBits} from '../src/bits';
 import {prevDouble} from '../src/enumerate';
 
+import {randomInt, randomSign} from './random';
+
 const ATTEMPTS = 100;
 
 test('exponent of most significant bit', () => {
@@ -62,7 +64,16 @@ test('significantBits', () => {
   expect(significantBits(2 ** 53 - 1)).toBe(53);
   expect(significantBits(Number.MAX_VALUE)).toBe(53);
   expect(significantBits(Number.MIN_VALUE)).toBe(1);
+  expect(significantBits(Number.MIN_VALUE * 14)).toBe(3);
   expect(significantBits(Infinity)).toBe(NaN);
   expect(significantBits(-Infinity)).toBe(NaN);
   expect(significantBits(NaN)).toBe(NaN);
+});
+
+test('significantBits, random', () => {
+  for (let i = 0; i < ATTEMPTS * 100; i++) {
+    const x = randomSign() * 2 ** randomInt(-1074, 970) *
+        Math.floor(2 ** (Math.random() * 53));
+    expect(significantBits(x)).toBe(msbExp(x) - lsbExp(x) + 1);
+  }
 });
