@@ -1,15 +1,11 @@
 import {expect, test} from '@jest/globals';
 
 import {lsbExp, msbExp} from '../src/bits';
+import {Float116} from '../src/float116';
 
 import {randomInt, randomSign} from './random';
 
 const ATTEMPTS = 100;
-
-interface Float116 {
-  hi: number;
-  lo: number;
-}
 
 function addDD(x: number, y: number): Float116 {
   const sum = x + y;
