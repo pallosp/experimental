@@ -1,6 +1,6 @@
 import {expect, test} from '@jest/globals';
 
-import {lsbExp, msbExp, significantBits} from '../src/bits';
+import {isSubnormal, lsbExp, MIN_NORMAL_NUMBER, msbExp, significantBits} from '../src/bits';
 import {prevDouble} from '../src/enumerate';
 
 import {randomInt, randomSign} from './random';
@@ -76,4 +76,17 @@ test('significantBits, random', () => {
         Math.floor(2 ** (Math.random() * 53));
     expect(significantBits(x)).toBe(msbExp(x) - lsbExp(x) + 1);
   }
+});
+
+test('isSubnormal', () => {
+  expect(isSubnormal(0)).toBe(false);
+  expect(isSubnormal(Number.MIN_VALUE)).toBe(true);
+  expect(isSubnormal(Number.MIN_VALUE * (2 ** 52 - 1))).toBe(true);
+  expect(isSubnormal(Number.MIN_VALUE * 2 ** 52)).toBe(false);
+  expect(isSubnormal(-Number.MIN_VALUE)).toBe(true);
+  expect(isSubnormal(-Number.MIN_VALUE * (2 ** 52 - 1))).toBe(true);
+  expect(isSubnormal(-Number.MIN_VALUE * 2 ** 52)).toBe(false);
+  expect(isSubnormal(MIN_NORMAL_NUMBER)).toBe(false);
+  expect(isSubnormal(Infinity)).toBe(false);
+  expect(isSubnormal(NaN)).toBe(false);
 });

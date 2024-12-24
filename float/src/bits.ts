@@ -11,6 +11,8 @@ function crz32(x: number): number {
   return 31 - Math.clz32(x & -x);
 }
 
+export const MIN_NORMAL_NUMBER = 2 ** -1022;
+
 /**
  * Returns the magnitude of the most significant bit of a float64, as an
  * exponent of 2. Equals to floor(log2(abs(x))).
@@ -57,4 +59,12 @@ export function significantBits(x: number): number {
   return h !== 0 ? (l !== 0 ? 64 - Math.clz32(h) - crz32(l) :
                               32 - Math.clz32(h) - crz32(h)) :
                    (l !== 0 ? 32 - Math.clz32(l) - crz32(l) : 0);
+}
+
+/**
+ * Tells whether x is a subnormal floating point number.
+ * https://en.wikipedia.org/wiki/Subnormal_number
+ */
+export function isSubnormal(x: number): boolean {
+  return Math.abs(x) < MIN_NORMAL_NUMBER && x !== 0;
 }
