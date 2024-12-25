@@ -24,6 +24,7 @@ export function sumUpperBound(x: number, y: number): number {
 /** Floating point rounding error of x+y. */
 export function errorOfSum(x: number, y: number): number {
   const sum = x + y;
+  if (!isFinite(sum)) return isFinite(x - y) ? sum : 0;
   const x1 = sum - y;
   return x1 - x - (x1 - sum + y);
 }

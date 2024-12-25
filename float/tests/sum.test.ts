@@ -122,3 +122,12 @@ test('addDD, integers', () => {
     if (sum.hi !== 0) expect(msbExp(sum.lo)).toBeLessThan(lsbExp(sum.hi));
   }
 });
+
+test('addDD, non-finite sum', () => {
+  expect(addDD(Number.MAX_VALUE, Number.MAX_VALUE))
+      .toEqual({hi: Infinity, lo: -Infinity});
+  expect(addDD(-Number.MAX_VALUE, -Number.MAX_VALUE))
+      .toEqual({hi: -Infinity, lo: Infinity});
+  expect(addDD(Infinity, 1)).toEqual({hi: Infinity, lo: 0});
+  expect(addDD(NaN, 1)).toEqual({hi: NaN, lo: 0});
+});
