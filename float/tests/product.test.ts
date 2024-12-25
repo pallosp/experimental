@@ -1,6 +1,6 @@
 import {expect, test} from '@jest/globals';
 
-import {lsbExp} from '../src/bits';
+import {lsbExp, msbExp} from '../src/bits';
 import {Float116} from '../src/float116';
 import {isProductExact, mulDD} from '../src/product';
 import {addDD} from '../src/sum';
@@ -8,6 +8,29 @@ import {addDD} from '../src/sum';
 import {randomInt, randomSign} from './random';
 
 const ATTEMPTS = 100;
+
+// Splits a float64 to the sum of two float64s with non-overlapping
+// significands. Both parts have at most 26 mantissa bits.
+// The logic was copied out from mulDD to test it separately.
+function split(x: number): Float116 {
+  const splitter = 0x7ffffff;
+  const hi = x + x * splitter - x * splitter;
+  return {hi, lo: x - hi};
+}
+
+// Checks whether split() does the right thing for the given number:
+// - The sum must match.
+// - The parts must be disjoint.
+// - The parts must have few enough significant bits so that squaring them or
+//   multiplying them with each other won't cause loss of precision.
+function isWellSplit(x: number) {
+  const {hi, lo} = split(x);
+  return x === hi + lo &&  //
+      lsbExp(hi * hi) === lsbExp(hi) * 2 &&
+      lsbExp(lo * lo) === lsbExp(lo) * 2 &&
+      lsbExp(lo * hi) === lsbExp(lo) + lsbExp(hi) &&
+      (lo === 0 || lsbExp(hi) > msbExp(lo));
+}
 
 /** Simple but slow implementation of exact float64 multiplication. */
 function mulDDSlow(x: number, y: number): Float116 {
@@ -52,6 +75,17 @@ test('isProductExact', () => {
   expect(isProductExact(NaN, NaN)).toBe(false);
   expect(isProductExact(NaN, 1)).toBe(false);
   expect(isProductExact(Infinity, NaN)).toBe(false);
+});
+
+test('splitting float64s to disjoint parts', () => {
+  expect(isWellSplit(0)).toBe(true);
+  expect(isWellSplit(2 ** 53 + 2)).toBe(true);
+  expect(isWellSplit(0x1ffffff7ffffff)).toBe(true);
+
+  for (let i = 0; i < ATTEMPTS; i++) {
+    const x = randomInt(0, Number.MAX_SAFE_INTEGER);
+    expect(isWellSplit(x)).toBe(true);
+  }
 });
 
 test('mulDD and mulDDSlow, hand-picked values', () => {
