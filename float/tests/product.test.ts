@@ -161,21 +161,21 @@ test('mulDD, zeroness of the lower part', () => {
 });
 
 test('mulDD vs mulDDSlow benchmark', () => {
-  let start = performance.now();
-  for (let i = 0; i < 10000; i++) {
+  const start1 = performance.now();
+  for (let i = 0; i < 10000; i++)
     mulDD(MAX_SAFE_INTEGER - i, MAX_SAFE_INTEGER - i);
-  }
-  console.info(
-      'high precision float64 multiplication, by splitting:',
-      (performance.now() - start).toFixed(1), 'ms');
+  const elapsed1 = performance.now() - start1;
 
-  start = performance.now();
-  for (let i = 0; i < 10000; i++) {
+  const start2 = performance.now();
+  for (let i = 0; i < 10000; i++)
     mulDDSlow(MAX_SAFE_INTEGER - i, MAX_SAFE_INTEGER - i);
-  }
+  const elapsed2 = performance.now() - start2;
+
   console.info(
-      'high precision float64 multiplication, bigint based algorithm:',
-      (performance.now() - start).toFixed(1), 'ms');
+      `high precision float64 multiplication, by splitting: ${
+          elapsed1.toFixed(1)} ms\n` +
+      `high precision float64 multiplication, bigint based algorithm: ${
+          elapsed2.toFixed(1)} ms`);
 });
 
 test('errorOfProduct vs isProductExact benchmark', () => {
