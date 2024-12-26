@@ -87,6 +87,14 @@ test('isProductExact', () => {
   }
 });
 
+test('isProductExact, simple division is insufficient', () => {
+  const isProductExactWithFalsePositives = (x: number, y: number) =>
+      x * y / x === y && x * y / y === x;
+
+  expect(isProductExact(2 ** 27 + 1, 2 ** 27 - 1)).toBe(false);
+  expect(isProductExactWithFalsePositives(2 ** 27 + 1, 2 ** 27 - 1)).toBe(true);
+});
+
 test('splitting float64s to disjoint parts', () => {
   expect(isWellSplit(0)).toBe(true);
   expect(isWellSplit(2 ** 53 + 2)).toBe(true);
