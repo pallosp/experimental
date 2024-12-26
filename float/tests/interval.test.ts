@@ -3,13 +3,18 @@ import {expect, test} from '@jest/globals';
 import {nextDouble, prevDouble} from '../src/enumerate';
 import {add} from '../src/interval';
 
-const MAX_DOUBLE = Number.MAX_VALUE;
 const MIN_DOUBLE = Number.MIN_VALUE;
+const MAX_SAFE_INT = Number.MAX_SAFE_INTEGER;
+const MAX_DOUBLE = Number.MAX_VALUE;
 
 test('add scalars', () => {
   expect(add(1, 2)).toEqual([3, 3]);
   expect(add(1, Number.MIN_VALUE)).toEqual([1, nextDouble(1)]);
   expect(add(1, -Number.MIN_VALUE)).toEqual([prevDouble(1), 1]);
+  expect(add(0.25, 0.0625)).toEqual([0.3125, 0.3125]);
+  expect(add(0.1, 0.2)).toEqual([0.3, nextDouble(0.3)]);
+  expect(add(MAX_SAFE_INT, 2)).toEqual([MAX_SAFE_INT + 1, MAX_SAFE_INT + 3]);
+  expect(add(MAX_DOUBLE, -MAX_DOUBLE)).toEqual([0, 0]);
 });
 
 test('add intervals', () => {
