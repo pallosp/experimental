@@ -9,6 +9,10 @@ import {randomInt, randomSign} from './random';
 
 const ATTEMPTS = 100;
 
+const MIN_DOUBLE = Number.MIN_VALUE;
+const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
+const MAX_DOUBLE = Number.MAX_VALUE;
+
 // Splits a float64 to the sum of two float64s with non-overlapping
 // significands. Both parts have at most 26 mantissa bits.
 // The logic was copied out from mulDD to test it separately.
@@ -34,9 +38,10 @@ function isWellSplit(x: number) {
 
 /** Simple but slow implementation of exact float64 multiplication. */
 function mulDDSlow(x: number, y: number): Float116 {
+  if (!isFinite(x) || !isFinite(y) || x === 0 || y === 0)
+    return {hi: x * y, lo: isNaN(x * y) ? NaN : 0};
   const lsbX = lsbExp(x);
   const lsbY = lsbExp(y);
-  if (!isFinite(lsbX) || !isFinite(lsbY)) return {hi: x * y, lo: 0};
   const p = BigInt(x / 2 ** lsbX) * BigInt(y / 2 ** lsbY);
   const lo = p % BigInt(2 ** 53);
   const hi = p - lo;
@@ -50,31 +55,36 @@ function mulDDSlow(x: number, y: number): Float116 {
   }
 }
 
+export function isProductExactSlow(x: number, y: number): boolean {
+  return lsbExp(x) + lsbExp(y) === lsbExp(x * y);
+}
+
 test('isProductExact', () => {
-  expect(isProductExact(2, 3)).toBe(true);
-  expect(isProductExact(4, -5)).toBe(true);
-  expect(isProductExact(4 * 2 ** 40, -5 * 2 ** -100)).toBe(true);
-  expect(isProductExact(0, 0)).toBe(true);
-  expect(isProductExact(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER))
-      .toBe(false);
-  expect(isProductExact(Number.MAX_SAFE_INTEGER + 1, Number.MAX_SAFE_INTEGER))
-      .toBe(true);
-  expect(isProductExact(0, Number.MAX_VALUE)).toBe(true);
-  expect(isProductExact(Number.MIN_VALUE, Number.MAX_VALUE)).toBe(true);
-  expect(isProductExact(Number.MIN_VALUE, Number.MAX_SAFE_INTEGER)).toBe(true);
-  // underflow
-  expect(isProductExact(Number.MIN_VALUE, 0.5)).toBe(false);
-  // overflow
-  expect(isProductExact(2e200, 3e200)).toBe(false);
-  // infinity
-  expect(isProductExact(10, Infinity)).toBe(true);
-  expect(isProductExact(-Infinity, Infinity)).toBe(true);
-  expect(isProductExact(10, Infinity)).toBe(true);
-  expect(isProductExact(-Infinity, Infinity)).toBe(true);
-  // nan
-  expect(isProductExact(NaN, NaN)).toBe(false);
-  expect(isProductExact(NaN, 1)).toBe(false);
-  expect(isProductExact(Infinity, NaN)).toBe(false);
+  for (const isProductExactFunc of [isProductExact, isProductExactSlow]) {
+    expect(isProductExactFunc(2, 3)).toBe(true);
+    expect(isProductExactFunc(4, -5)).toBe(true);
+    expect(isProductExactFunc(4 * 2 ** 40, -5 * 2 ** -100)).toBe(true);
+    expect(isProductExactFunc(0, 0)).toBe(true);
+    expect(isProductExactFunc(MAX_SAFE_INTEGER, MAX_SAFE_INTEGER)).toBe(false);
+    expect(isProductExactFunc(MAX_SAFE_INTEGER + 1, MAX_SAFE_INTEGER))
+        .toBe(true);
+    expect(isProductExactFunc(0, Number.MAX_VALUE)).toBe(true);
+    expect(isProductExactFunc(MIN_DOUBLE, MAX_DOUBLE)).toBe(true);
+    expect(isProductExactFunc(MIN_DOUBLE, MAX_SAFE_INTEGER)).toBe(true);
+    // underflow
+    expect(isProductExactFunc(MIN_DOUBLE, 0.5)).toBe(false);
+    // overflow
+    expect(isProductExactFunc(2e200, 3e200)).toBe(false);
+    // infinity
+    expect(isProductExactFunc(10, Infinity)).toBe(true);
+    expect(isProductExactFunc(-Infinity, Infinity)).toBe(true);
+    expect(isProductExactFunc(10, Infinity)).toBe(true);
+    expect(isProductExactFunc(-Infinity, Infinity)).toBe(true);
+    // nan
+    expect(isProductExactFunc(NaN, NaN)).toBe(false);
+    expect(isProductExactFunc(NaN, 1)).toBe(false);
+    expect(isProductExactFunc(Infinity, NaN)).toBe(false);
+  }
 });
 
 test('splitting float64s to disjoint parts', () => {
@@ -83,15 +93,12 @@ test('splitting float64s to disjoint parts', () => {
   expect(isWellSplit(0x1ffffff7ffffff)).toBe(true);
 
   for (let i = 0; i < ATTEMPTS; i++) {
-    const x = randomInt(0, Number.MAX_SAFE_INTEGER);
+    const x = randomInt(0, MAX_SAFE_INTEGER);
     expect(isWellSplit(x)).toBe(true);
   }
 });
 
 test('mulDD and mulDDSlow, hand-picked values', () => {
-  const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
-  const MAX_DOUBLE = Number.MAX_VALUE;
-
   const testCases = [
     // zero factor
     {x: 0, y: 12, hi: 0, lo: 0},
@@ -102,7 +109,7 @@ test('mulDD and mulDDSlow, hand-picked values', () => {
     // large * large integer
     {x: MAX_SAFE_INTEGER, y: MAX_SAFE_INTEGER, hi: 2 ** 106 - 2 ** 54, lo: 1},
     // subnormal product
-    {x: 6 * Number.MIN_VALUE, y: 7, hi: 42 * Number.MIN_VALUE, lo: 0},
+    {x: 6 * MIN_DOUBLE, y: 7, hi: 42 * MIN_DOUBLE, lo: 0},
     {
       x: MAX_SAFE_INTEGER * 2 ** -573,
       y: MAX_SAFE_INTEGER * 2 ** -573,
@@ -115,10 +122,10 @@ test('mulDD and mulDDSlow, hand-picked values', () => {
     // overflow
     {x: MAX_DOUBLE / 3, y: 3, hi: Infinity, lo: -Infinity},
     // non-finite factors
-    {x: Infinity, y: 0, hi: NaN, lo: 0},
+    {x: Infinity, y: 0, hi: NaN, lo: NaN},
     {x: Infinity, y: 0.5, hi: Infinity, lo: 0},
     {x: Infinity, y: -Infinity, hi: -Infinity, lo: 0},
-    {x: 1, y: NaN, hi: NaN, lo: 0},
+    {x: 1, y: NaN, hi: NaN, lo: NaN},
   ];
   for (const mulFunc of [mulDD, mulDDSlow])
     for (const {x, y, hi, lo} of testCases)
@@ -156,7 +163,7 @@ test('mulDD, zeroness of the lower part', () => {
 test('mulDD vs mulDDSlow benchmark', () => {
   let start = performance.now();
   for (let i = 0; i < 10000; i++) {
-    mulDD(Number.MAX_SAFE_INTEGER - i, Number.MAX_SAFE_INTEGER - i);
+    mulDD(MAX_SAFE_INTEGER - i, MAX_SAFE_INTEGER - i);
   }
   console.info(
       'high precision float64 multiplication, by splitting:',
@@ -164,9 +171,32 @@ test('mulDD vs mulDDSlow benchmark', () => {
 
   start = performance.now();
   for (let i = 0; i < 10000; i++) {
-    mulDDSlow(Number.MAX_SAFE_INTEGER - i, Number.MAX_SAFE_INTEGER - i);
+    mulDDSlow(MAX_SAFE_INTEGER - i, MAX_SAFE_INTEGER - i);
   }
   console.info(
       'high precision float64 multiplication, bigint based algorithm:',
       (performance.now() - start).toFixed(1), 'ms');
+});
+
+test('errorOfProduct vs isProductExact benchmark', () => {
+  const base = 2 ** 27;
+
+  const start1 = performance.now();
+  let c1 = 0;
+  for (let i = 0; i < 10000; i++) {
+    c1 += +isProductExact(base - i, base - i);
+  }
+  const elapsed1 = performance.now() - start1;
+
+  const start2 = performance.now();
+  let c2 = 0;
+  for (let i = 0; i < 10000; i++) {
+    c2 += +isProductExactSlow(base - i, base - i);
+  }
+  const elapsed2 = performance.now() - start2;
+  console.info(
+      `isProductExact (error calculation): ${elapsed1.toFixed(1)} ms\n` +
+      `isProductExact (lsb comparison): ${elapsed2.toFixed(1)} ms`);
+
+  expect(c1).toBe(c2);
 });

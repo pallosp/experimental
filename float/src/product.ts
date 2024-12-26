@@ -1,10 +1,9 @@
-import {lsbExp} from './bits';
 import {Float116} from './float116';
 import {errorOfSum} from './sum';
 
 /** Whether x*y can be exactly represented as a float64. */
 export function isProductExact(x: number, y: number): boolean {
-  return lsbExp(x) + lsbExp(y) === lsbExp(x * y);
+  return errorOfProduct(x, y) === 0 && !(x !== 0 && y !== 0 && x * y === 0);
 }
 
 const MAX_FACTOR = 2 ** 511;
@@ -12,8 +11,8 @@ const MIN_FACTOR = 1 / MAX_FACTOR;
 
 export function errorOfProduct(x: number, y: number): number {
   let p = x * y;
-  // Handle when the product is ±Infinity, NaN or when it overflows.
-  if (p - p !== 0) return x - x === 0 && y - y === 0 ? p : 0;
+  // Handle overflows and ±Infinity or NaN products.
+  if (p - p !== 0) return x - x === 0 && y - y === 0 || p !== p ? p : 0;
   // Bring the factors between ±2^-511 and ±2^511 to avoid overflow or underflow
   // in the intermediate results.
   let f = 1;
