@@ -2,13 +2,37 @@ import {expect, test} from '@jest/globals';
 
 import {lsbExp, msbExp} from '../src/bits';
 import {nextDouble, prevDouble} from '../src/enumerate';
-import {addDD, isSumExact, sumLowerBound, sumUpperBound} from '../src/sum';
+import {addDD, errorOfSum, isSumExact, sumLowerBound, sumUpperBound} from '../src/sum';
 
 import {randomInt, randomSign} from './random';
 
 const ATTEMPTS = 100;
 
-test('isSumExact', () => {
+const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
+
+function isErrorOfSumZero(x: number, y: number): boolean {
+  return errorOfSum(x, y) === 0;
+}
+
+test('isSumExact, hand-picked terms', () => {
+  for (const isSumExactFunc of [isSumExact, isErrorOfSumZero]) {
+    expect(isSumExactFunc(34, -21)).toBe(true);
+
+    expect(isSumExactFunc(MAX_SAFE_INTEGER, MAX_SAFE_INTEGER)).toBe(true);
+    expect(isSumExactFunc(MAX_SAFE_INTEGER, MAX_SAFE_INTEGER + 1)).toBe(false);
+
+    expect(isSumExactFunc(Number.MAX_VALUE, 0)).toBe(true);
+    expect(isSumExactFunc(Number.MAX_VALUE, 1)).toBe(false);
+    expect(isSumExactFunc(Number.MAX_VALUE, Number.MAX_VALUE)).toBe(false);
+
+    expect(isSumExactFunc(Infinity, 1)).toBe(true);
+    expect(isSumExactFunc(Infinity, Infinity)).toBe(true);
+    expect(isSumExactFunc(Infinity, -Infinity)).toBe(false);
+    expect(isSumExactFunc(NaN, 0)).toBe(false);
+  }
+});
+
+test('isSumExact, random terms', () => {
   for (let i = 0; i < ATTEMPTS; i++) {
     const x = randomSign() / Math.random();
     const y = randomSign() / Math.random();
@@ -129,5 +153,5 @@ test('addDD, non-finite sum', () => {
   expect(addDD(-Number.MAX_VALUE, -Number.MAX_VALUE))
       .toEqual({hi: -Infinity, lo: Infinity});
   expect(addDD(Infinity, 1)).toEqual({hi: Infinity, lo: 0});
-  expect(addDD(NaN, 1)).toEqual({hi: NaN, lo: 0});
+  expect(addDD(NaN, 1)).toEqual({hi: NaN, lo: NaN});
 });
