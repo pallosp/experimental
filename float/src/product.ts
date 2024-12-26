@@ -1,6 +1,6 @@
 import {lsbExp} from './bits';
 import {Float116} from './float116';
-import {addDD} from './sum';
+import {errorOfSum} from './sum';
 
 /** Whether x*y can be exactly represented as a float64. */
 export function isProductExact(x: number, y: number): boolean {
@@ -10,14 +10,10 @@ export function isProductExact(x: number, y: number): boolean {
 const MAX_FACTOR = 2 ** 511;
 const MIN_FACTOR = 1 / MAX_FACTOR;
 
-/**
- * Calculates x*y with high precision. The result will be exact unless it
- * overflows to Infinity, or underflows to 0 or to the subnormal range.
- */
-export function mulDD(x: number, y: number): Float116 {
+export function errorOfProduct(x: number, y: number): number {
   let p = x * y;
   // Handle when the product is ±Infinity, NaN or when it overflows.
-  if (p - p !== 0) return {hi: p, lo: x - x === 0 && y - y === 0 ? -p : 0};
+  if (p - p !== 0) return x - x === 0 && y - y === 0 ? p : 0;
   // Bring the factors between ±2^-511 and ±2^511 to avoid overflow or underflow
   // in the intermediate results.
   let f = 1;
@@ -46,5 +42,14 @@ export function mulDD(x: number, y: number): Float116 {
   p = xh * yh;
   const q = xh * yl + xl * yh;
   const s = p + q;
-  return addDD(s * f, (p - s + q + xl * yl) * f);
+  // Normalize the result.
+  return errorOfSum(s, p - s + q + xl * yl) * f;
+}
+
+/**
+ * Calculates x*y with high precision. The result will be exact unless it
+ * overflows to Infinity, or underflows to 0 or to the subnormal range.
+ */
+export function mulDD(x: number, y: number): Float116 {
+  return {hi: x * y, lo: 0 - errorOfProduct(x, y)};
 }
