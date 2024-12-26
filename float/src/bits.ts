@@ -18,7 +18,7 @@ export const MIN_NORMAL_NUMBER = 2 ** -1022;
  * exponent of 2. Equals to floor(log2(abs(x))).
  */
 export function msbExp(x: number): number {
-  if (!isFinite(x)) return Math.abs(x);
+  if (x - x !== 0) return x >= 0 ? x : -x;
   if (x === 0) return -Infinity;
   f64[0] = x;
   const rawExp = (halves[1] & 0x7FF00000) >>> 20;
@@ -32,7 +32,7 @@ export function msbExp(x: number): number {
  * as an exponent of 2.
  */
 export function lsbExp(x: number): number {
-  if (!isFinite(x)) return Math.abs(x);
+  if (x - x !== 0) return x >= 0 ? x : -x;
   if (x === 0) return -Infinity;
   f64[0] = x;
   const rawExp = (halves[1] & 0x7FF00000) >>> 20;
@@ -47,7 +47,7 @@ export function lsbExp(x: number): number {
  * Equals to msbExp(x)-lsbExp(x)+1 for non-zero finite numbers.
  */
 export function significantBits(x: number): number {
-  if (!isFinite(x)) return NaN;
+  if (x - x !== 0) return NaN;
   f64[0] = x;
   const l = halves[0];
   if (halves[1] & 0x7FF00000) {
@@ -66,5 +66,5 @@ export function significantBits(x: number): number {
  * https://en.wikipedia.org/wiki/Subnormal_number
  */
 export function isSubnormal(x: number): boolean {
-  return Math.abs(x) < MIN_NORMAL_NUMBER && x !== 0;
+  return x < MIN_NORMAL_NUMBER && x > -MIN_NORMAL_NUMBER && x !== 0;
 }
