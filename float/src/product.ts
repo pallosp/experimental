@@ -12,7 +12,7 @@ const MIN_FACTOR = 1 / MAX_FACTOR;
 export function errorOfProduct(x: number, y: number): number {
   let p = x * y;
   // Handle overflows and ±Infinity or NaN products.
-  if (p - p !== 0) return x - x === 0 && y - y === 0 || p !== p ? p : 0;
+  if (p - p !== 0) return p !== p ? NaN : x - x === 0 && y - y === 0 ? p : 0;
   // Bring the factors between ±2^-511 and ±2^511 to avoid overflow or underflow
   // in the intermediate results.
   let f = 1;

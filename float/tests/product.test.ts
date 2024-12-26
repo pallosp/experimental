@@ -38,8 +38,10 @@ function isWellSplit(x: number) {
 
 /** Simple but slow implementation of exact float64 multiplication. */
 function mulDDSlow(x: number, y: number): Float116 {
+  const xy = x * y;
   if (!isFinite(x) || !isFinite(y) || x === 0 || y === 0)
-    return {hi: x * y, lo: isNaN(x * y) ? NaN : 0};
+    return {hi: xy, lo: isNaN(xy) ? NaN : 0};
+  if (!isFinite(xy)) return {hi: xy, lo: -xy};
   const lsbX = lsbExp(x);
   const lsbY = lsbExp(y);
   const p = BigInt(x / 2 ** lsbX) * BigInt(y / 2 ** lsbY);
@@ -112,22 +114,28 @@ test('mulDD and mulDDSlow, hand-picked values', () => {
     {x: 0, y: 12, hi: 0, lo: 0},
     // fractional numbers
     {x: 1.25, y: 6.0625, hi: 1.25 * 6.0625, lo: 0},
+    // medium * medium integer, large product
+    {x: 1e8 + 1, y: 1e8 - 1, hi: 1e16, lo: -1},
     // small * large integer
     {x: MAX_SAFE_INTEGER, y: 3, hi: 3 * 2 ** 53 - 4, lo: 1},
     // large * large integer
     {x: MAX_SAFE_INTEGER, y: MAX_SAFE_INTEGER, hi: 2 ** 106 - 2 ** 54, lo: 1},
     // subnormal product
     {x: 6 * MIN_DOUBLE, y: 7, hi: 42 * MIN_DOUBLE, lo: 0},
+    // subnormal product, error underflows
     {
       x: MAX_SAFE_INTEGER * 2 ** -573,
       y: MAX_SAFE_INTEGER * 2 ** -573,
       hi: 2 ** -1040,
       lo: 0
     },
+    // product underflows
+    {x: 1e-200, y: 1e-200, hi: 0, lo: 0},
     // near MAX_VALUE
     {x: MAX_DOUBLE, y: 0.75, hi: 3 * 2 ** 1022 - 4 * 2 ** 969, lo: 2 ** 969},
     {x: MAX_DOUBLE, y: 1, hi: MAX_DOUBLE, lo: 0},
-    // overflow
+    // product overflows
+    {x: 1e200, y: 1e200, hi: Infinity, lo: -Infinity},
     {x: MAX_DOUBLE / 3, y: 3, hi: Infinity, lo: -Infinity},
     // non-finite factors
     {x: Infinity, y: 0, hi: NaN, lo: NaN},
