@@ -2,8 +2,9 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "vite",
 		"build": "vite build",
+		"dev": "vite",
+		"prepare": "husky",
 		"preview": "vite preview"
 	},
 	"dependencies": {
@@ -12,6 +13,7 @@
 	},
 	"devDependencies": {
 		"@preact/preset-vite": "^2.10.1",
+		"husky": "^9.1.7",
 		"typescript": "^5.8.2",
 		"vite": "^6.2.0"
 	}
