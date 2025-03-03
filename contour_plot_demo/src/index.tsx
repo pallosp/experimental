@@ -1,5 +1,7 @@
 import { render } from 'preact';
 
+import { SvgPlot } from './svg_plot';
+
 import './style.css';
 
 export function App() {
@@ -16,7 +18,7 @@ export function App() {
       <p>
         <PlotStats />
       </p>
-      <Chart />
+      <SvgPlot />
     </>
   );
 }
@@ -48,14 +50,6 @@ function PixelSizeInput() {
 function PlotStats(props: { text?: string }) {
   return (
     <span id="plot-stats">{props.text ?? '…'}</span>
-  )
-}
-
-function Chart() {
-  return (
-    <svg>
-      <g id="chart" />
-    </svg>
   )
 }
 
