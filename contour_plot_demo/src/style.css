@@ -29,10 +29,16 @@ label {
   width: 2.5em;
 }
 
-.line {
+.background,
+.outside {
+  stroke: #f0f0f0;
+}
+
+.line,
+.perimeter {
   stroke: royalblue;
 }
 
-.background {
-  stroke: #f0f0f0;
+.inside {
+  stroke: lightblue;
 }
