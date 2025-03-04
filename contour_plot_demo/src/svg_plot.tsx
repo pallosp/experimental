@@ -1,5 +1,5 @@
 
-import { Plot, Rect, runsToSvg } from 'contour-plot-svg';
+import { Plot, Rect, runsToSvg, squaresToSvg } from 'contour-plot-svg';
 import { Component, createRef } from 'preact';
 
 import { Function2D } from './functions';
@@ -11,11 +11,16 @@ export interface PlotConfig<T> {
   addStyles: (el: SVGGraphicsElement, value: T) => void;
 }
 
-export class SvgPlot<T> extends Component<{ config: PlotConfig<T> }> {
+interface Props<T> {
+  config: PlotConfig<T>;
+  showEdges: boolean;
+}
+
+export class SvgPlot<T> extends Component<Props<any>> {
   svgRef = createRef<SVGSVGElement>();
   contentRef = createRef<SVGGElement>();
 
-  constructor(props: { config: PlotConfig<T> }) {
+  constructor(props: Props<unknown>) {
     super(props);
   }
 
@@ -48,11 +53,18 @@ export class SvgPlot<T> extends Component<{ config: PlotConfig<T> }> {
     const plot = new Plot(config.func)
       .compute(domain, config.sampleSpacing, this.pixelSize());
 
+    let svgElements: SVGGraphicsElement[];
+    if (this.props.showEdges) {
+      svgElements = squaresToSvg(plot.squares(), config.addStyles, { edges: true });
+    } else {
+      svgElements = runsToSvg(plot.runs(), config.addStyles);
+    }
+
     const content = this.contentRef.current;
     content.setAttribute(
       'transform', `scale(${this.zoom()}) translate(${-domain.x}, ${-domain.y})`);
     content.textContent = '';
-    content.append(...runsToSvg(plot.runs(), this.props.config.addStyles));
+    content.append(...svgElements);
   }
 
   override componentDidMount() {

@@ -49,6 +49,7 @@ function mandelbrotPlot(): PlotConfig<number> {
 
 export function App() {
   const [plotConfig, setPlotConfig] = useState<PlotConfig<any>>(linePlot());
+  const [showEdges, setShowEdges] = useState(false);
 
   return (
     <>
@@ -57,13 +58,13 @@ export function App() {
         <FunctionButton text="Circles" onclick={() => setPlotConfig(circlePlot)} />
         <FunctionButton text="Mandelbrot set" onclick={() => setPlotConfig(mandelbrotPlot)} />
         <FunctionButton text="sin x + cos y" onclick={() => setPlotConfig(sinCosPlot)} />
-        <ShowEdgesCheckbox />
+        <ShowEdgesCheckbox setShowEdges={setShowEdges} />
         <PixelSizeInput />
       </p>
       <p>
         <PlotStats />
       </p>
-      <SvgPlot config={plotConfig} />
+      <SvgPlot config={plotConfig} showEdges={showEdges} />
     </>
   );
 }
@@ -76,10 +77,11 @@ function FunctionButton(props: { text: string, onclick: () => void }) {
   )
 }
 
-function ShowEdgesCheckbox() {
+function ShowEdgesCheckbox(props: { setShowEdges: (checked: boolean) => void }) {
   return (
     <label>
-      <input id="show-edges" type="checkbox" /> Show edges
+      <input id="show-edges" type="checkbox"
+        onChange={(e) => props.setShowEdges(e.currentTarget.checked)} /> Show edges
     </label>
   );
 }
