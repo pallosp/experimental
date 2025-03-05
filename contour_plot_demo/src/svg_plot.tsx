@@ -1,13 +1,12 @@
+import {Plot, Rect, runsToSvg, squaresToSvg} from 'contour-plot-svg';
+import {Component, createRef} from 'preact';
 
-import { Plot, Rect, runsToSvg, squaresToSvg } from 'contour-plot-svg';
-import { Component, createRef } from 'preact';
-
-import { Function2D } from './functions';
+import {Function2D} from './functions';
 
 export interface PlotConfig<T> {
   func: Function2D<T>;
-  sampleSpacing: number,
-  zoom: number,
+  sampleSpacing: number;
+  zoom: number;
   addStyles: (el: SVGGraphicsElement, value: T) => void;
 }
 
@@ -33,7 +32,7 @@ export class SvgPlot<T> extends Component<Props<any>> {
     const el = this.svgRef.current;
     const width = el.clientWidth / this.zoom();
     const height = el.clientHeight / this.zoom();
-    return { x: -width / 2, y: -height / 2, width, height };
+    return {x: -width / 2, y: -height / 2, width, height};
   }
 
   private domainPixelSize(): number {
@@ -45,25 +44,30 @@ export class SvgPlot<T> extends Component<Props<any>> {
       <svg ref={this.svgRef}>
         <g ref={this.contentRef} />
       </svg>
-    )
+    );
   }
 
   private updatePlot() {
     const domain = this.domain();
     const config = this.props.config;
-    const plot = new Plot(config.func)
-      .compute(domain, config.sampleSpacing, this.domainPixelSize());
+    const plot = new Plot(config.func).compute(
+      domain,
+      config.sampleSpacing,
+      this.domainPixelSize()
+    );
 
     let svgElements: SVGGraphicsElement[];
     if (this.props.showEdges) {
-      svgElements = squaresToSvg(plot.squares(), config.addStyles, { edges: true });
+      svgElements = squaresToSvg(plot.squares(), config.addStyles, {edges: true});
     } else {
       svgElements = runsToSvg(plot.runs(), config.addStyles);
     }
 
     const content = this.contentRef.current;
     content.setAttribute(
-      'transform', `scale(${this.zoom()}) translate(${-domain.x}, ${-domain.y})`);
+      'transform',
+      `scale(${this.zoom()}) translate(${-domain.x}, ${-domain.y})`
+    );
     content.textContent = '';
     content.append(...svgElements);
   }

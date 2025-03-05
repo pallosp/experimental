@@ -1,20 +1,27 @@
 {
-	"private": true,
-	"type": "module",
-	"scripts": {
-		"build": "vite build",
-		"dev": "vite",
-		"prepare": "husky",
-		"preview": "vite preview"
-	},
-	"dependencies": {
-		"contour-plot-svg": "^2.0.2",
-		"preact": "^10.26.4"
-	},
-	"devDependencies": {
-		"@preact/preset-vite": "^2.10.1",
-		"husky": "^9.1.7",
-		"typescript": "^5.8.2",
-		"vite": "^6.2.0"
-	}
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "prepare": "husky",
+    "preview": "vite preview"
+  },
+  "prettier": {
+    "bracketSpacing": false,
+    "printWidth": 100,
+    "singleQuote": true,
+    "trailingComma": "none"
+  },
+  "dependencies": {
+    "contour-plot-svg": "^2.0.2",
+    "preact": "^10.26.4"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.1",
+    "husky": "^9.1.7",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.0"
+  }
 }
