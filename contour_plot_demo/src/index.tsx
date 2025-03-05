@@ -48,7 +48,7 @@ function mandelbrotPlot(): PlotConfig<number> {
 }
 
 export function App() {
-  const [plotConfig, setPlotConfig] = useState<PlotConfig<any>>(linePlot());
+  const [plotConfig, setPlotConfig] = useState<PlotConfig<unknown>>(linePlot());
   const [showEdges, setShowEdges] = useState(false);
   const [pixelSizeExponent, setPixelSizeExponent] = useState(devicePixelRatio > 1 ? -1 : 0);
 
@@ -89,7 +89,7 @@ function ShowEdgesCheckbox(props: {setShowEdges: (checked: boolean) => void}) {
         type="checkbox"
         onChange={(e) => props.setShowEdges(e.currentTarget.checked)}
       />
-       Show edges
+      &thinsp;Show edges
     </label>
   );
 }

@@ -10,17 +10,17 @@ export interface PlotConfig<T> {
   addStyles: (el: SVGGraphicsElement, value: T) => void;
 }
 
-interface Props<T> {
-  config: PlotConfig<T>;
+interface Props {
+  config: PlotConfig<unknown>;
   showEdges: boolean;
   viewportPixelSize: number;
 }
 
-export class SvgPlot<T> extends Component<Props<any>> {
+export class SvgPlot extends Component<Props> {
   svgRef = createRef<SVGSVGElement>();
   contentRef = createRef<SVGGElement>();
 
-  constructor(props: Props<unknown>) {
+  constructor(props: Props) {
     super(props);
   }
 
