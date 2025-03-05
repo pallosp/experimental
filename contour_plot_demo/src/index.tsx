@@ -127,19 +127,26 @@ function PlotStats(props: {stats: Stats | undefined}) {
   if (!stats) return '…';
 
   const pixelsPerEval = stats.newArea / stats.newCalls;
-  const computeStatsText =
-    stats.newCalls > 0
-      ? `Computed f(x,y) ${stats.newCalls.toLocaleString()} times, ` +
-        `once for every ${+pixelsPerEval.toFixed(1)} pixels ` +
-        `in ${Math.round(stats.elapsedMs)} ms. `
-      : '';
-  const renderStatsText =
-    `Built ${(stats.squareCount + stats.runCount).toLocaleString()} ` +
-    `${stats.squareCount > 0 ? 'squares' : 'runs'} ` +
-    `in ${stats.buildSvgMs} ms ` +
-    `and drew them in ${stats.drawMs} ms. `;
-  const svgStatsText = `SVG size: ${Math.round(stats.svgSize / 1024)} KiB`;
-  return computeStatsText + renderStatsText + svgStatsText;
+  const computeStats =
+    stats.newCalls > 0 ? (
+      <span class="stats-item">
+        Computed f(x,y) {stats.newCalls.toLocaleString()} times, once for every{' '}
+        {+pixelsPerEval.toFixed(1)} pixels in {Math.round(stats.elapsedMs)} ms.
+      </span>
+    ) : null;
+  const renderStats = (
+    <span class="stats-item">
+      Built {(stats.squareCount + stats.runCount).toLocaleString()}
+      {stats.squareCount > 0 ? ' squares' : ' runs'} in {stats.buildSvgMs} ms and drew them in{' '}
+      {stats.drawMs} ms.
+    </span>
+  );
+  const svgStats = <span class="stats-item">SVG size: {Math.round(stats.svgSize / 1024)} KiB</span>;
+  return (
+    <>
+      {computeStats} {renderStats} {svgStats}
+    </>
+  );
 }
 
 render(<App />, document.body);
