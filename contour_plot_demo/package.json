@@ -16,7 +16,7 @@
     "importOrder": ["", "", "^[./]"]
   },
   "dependencies": {
-    "contour-plot-svg": "^2.0.2",
+    "contour-plot-svg": "^2.0.3",
     "preact": "^10.26.4"
   },
   "devDependencies": {

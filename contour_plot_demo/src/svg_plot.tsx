@@ -1,5 +1,5 @@
-import {Plot, Rect, runsToSvg, squaresToSvg} from 'contour-plot-svg';
-import {Component, createRef} from 'preact';
+import {ComputeStats, Plot, Rect, runsToSvg, squaresToSvg} from 'contour-plot-svg';
+import {Component, ComponentChildren, createRef} from 'preact';
 
 import {Function2D} from './functions';
 
@@ -10,10 +10,19 @@ export interface PlotConfig<T> {
   addStyles: (el: SVGGraphicsElement, value: T) => void;
 }
 
+export interface Stats extends ComputeStats {
+  squareCount: number;
+  runCount: number;
+  svgSize: number;
+  buildSvgMs: number;
+  drawMs: number;
+}
+
 interface Props {
   config: PlotConfig<unknown>;
   showEdges: boolean;
   viewportPixelSize: number;
+  onUpdate: (stats: Stats) => void;
 }
 
 export class SvgPlot extends Component<Props> {
@@ -39,14 +48,6 @@ export class SvgPlot extends Component<Props> {
     return this.props.viewportPixelSize / this.zoom();
   }
 
-  override render() {
-    return (
-      <svg ref={this.svgRef}>
-        <g ref={this.contentRef} />
-      </svg>
-    );
-  }
-
   private updatePlot() {
     const domain = this.domain();
     const config = this.props.config;
@@ -56,11 +57,21 @@ export class SvgPlot extends Component<Props> {
       this.domainPixelSize()
     );
 
+    const buildSvgStartMs = Date.now();
     let svgElements: SVGGraphicsElement[];
+    let squareCount = 0;
+    let runCount = 0;
+    let drawStartMs: number;
     if (this.props.showEdges) {
-      svgElements = squaresToSvg(plot.squares(), config.addStyles, {edges: true});
+      const squares = plot.squares();
+      drawStartMs = Date.now();
+      squareCount = squares.length;
+      svgElements = squaresToSvg(squares, config.addStyles, {edges: true});
     } else {
-      svgElements = runsToSvg(plot.runs(), config.addStyles);
+      const runs = plot.runs();
+      drawStartMs = Date.now();
+      runCount = runs.length;
+      svgElements = runsToSvg(runs, config.addStyles);
     }
 
     const content = this.contentRef.current;
@@ -70,9 +81,35 @@ export class SvgPlot extends Component<Props> {
     );
     content.textContent = '';
     content.append(...svgElements);
+
+    this.props.onUpdate({
+      ...plot.computeStats(),
+      squareCount,
+      runCount,
+      svgSize: this.svgRef.current.outerHTML.length,
+      buildSvgMs: drawStartMs - buildSvgStartMs,
+      drawMs: Date.now() - drawStartMs
+    });
   }
 
-  override componentDidMount() {
+  override shouldComponentUpdate(nextProps: Readonly<Props>): boolean {
+    const props = this.props;
+    return (
+      props.config.func !== nextProps.config.func ||
+      props.showEdges !== nextProps.showEdges ||
+      props.viewportPixelSize !== nextProps.viewportPixelSize
+    );
+  }
+
+  override render(): ComponentChildren {
+    return (
+      <svg ref={this.svgRef}>
+        <g ref={this.contentRef} />
+      </svg>
+    );
+  }
+
+  override componentDidMount(): void {
     this.updatePlot();
   }
 

@@ -2,7 +2,7 @@ import {render} from 'preact';
 import {useState} from 'preact/hooks';
 
 import {mandelbrot, randomCircles, randomLines, sinCos} from './functions';
-import {PlotConfig, SvgPlot} from './svg_plot';
+import {PlotConfig, Stats, SvgPlot} from './svg_plot';
 
 import './style.css';
 
@@ -51,6 +51,7 @@ export function App() {
   const [plotConfig, setPlotConfig] = useState<PlotConfig<unknown>>(linePlot());
   const [showEdges, setShowEdges] = useState(false);
   const [pixelSizeExponent, setPixelSizeExponent] = useState(devicePixelRatio > 1 ? -1 : 0);
+  const [stats, setStats] = useState<Stats | undefined>();
 
   return (
     <>
@@ -66,12 +67,13 @@ export function App() {
         />
       </p>
       <p>
-        <PlotStats />
+        <PlotStats stats={stats} />
       </p>
       <SvgPlot
         config={plotConfig}
         showEdges={showEdges}
         viewportPixelSize={2 ** pixelSizeExponent}
+        onUpdate={(s) => setStats(s)}
       />
     </>
   );
@@ -120,8 +122,24 @@ function PixelSizeInput(props: {
   );
 }
 
-function PlotStats(props: {text?: string}) {
-  return <span id="plot-stats">{props.text ?? '…'}</span>;
+function PlotStats(props: {stats: Stats | undefined}) {
+  const stats = props.stats;
+  if (!stats) return '…';
+
+  const pixelsPerEval = stats.newArea / stats.newCalls;
+  const computeStatsText =
+    stats.newCalls > 0
+      ? `Computed f(x,y) ${stats.newCalls.toLocaleString()} times, ` +
+        `once for every ${+pixelsPerEval.toFixed(1)} pixels ` +
+        `in ${Math.round(stats.elapsedMs)} ms. `
+      : '';
+  const renderStatsText =
+    `Built ${(stats.squareCount + stats.runCount).toLocaleString()} ` +
+    `${stats.squareCount > 0 ? 'squares' : 'runs'} ` +
+    `in ${stats.buildSvgMs} ms ` +
+    `and drew them in ${stats.drawMs} ms. `;
+  const svgStatsText = `SVG size: ${Math.round(stats.svgSize / 1024)} KiB`;
+  return computeStatsText + renderStatsText + svgStatsText;
 }
 
 render(<App />, document.body);
