@@ -14,6 +14,7 @@ export interface PlotConfig<T> {
 interface Props<T> {
   config: PlotConfig<T>;
   showEdges: boolean;
+  viewportPixelSize: number;
 }
 
 export class SvgPlot<T> extends Component<Props<any>> {
@@ -35,8 +36,8 @@ export class SvgPlot<T> extends Component<Props<any>> {
     return { x: -width / 2, y: -height / 2, width, height };
   }
 
-  private pixelSize(): number {
-    return (devicePixelRatio > 1 ? 0.5 : 1) / this.zoom();
+  private domainPixelSize(): number {
+    return this.props.viewportPixelSize / this.zoom();
   }
 
   override render() {
@@ -51,7 +52,7 @@ export class SvgPlot<T> extends Component<Props<any>> {
     const domain = this.domain();
     const config = this.props.config;
     const plot = new Plot(config.func)
-      .compute(domain, config.sampleSpacing, this.pixelSize());
+      .compute(domain, config.sampleSpacing, this.domainPixelSize());
 
     let svgElements: SVGGraphicsElement[];
     if (this.props.showEdges) {

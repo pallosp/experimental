@@ -50,6 +50,7 @@ function mandelbrotPlot(): PlotConfig<number> {
 export function App() {
   const [plotConfig, setPlotConfig] = useState<PlotConfig<any>>(linePlot());
   const [showEdges, setShowEdges] = useState(false);
+  const [pixelSizeExponent, setPixelSizeExponent] = useState(devicePixelRatio > 1 ? -1 : 0);
 
   return (
     <>
@@ -59,12 +60,13 @@ export function App() {
         <FunctionButton text="Mandelbrot set" onclick={() => setPlotConfig(mandelbrotPlot)} />
         <FunctionButton text="sin x + cos y" onclick={() => setPlotConfig(sinCosPlot)} />
         <ShowEdgesCheckbox setShowEdges={setShowEdges} />
-        <PixelSizeInput />
+        <PixelSizeInput pixelSizeExponent={pixelSizeExponent}
+          setPixelSizeExponent={setPixelSizeExponent} />
       </p>
       <p>
         <PlotStats />
       </p>
-      <SvgPlot config={plotConfig} showEdges={showEdges} />
+      <SvgPlot config={plotConfig} showEdges={showEdges} viewportPixelSize={2 ** pixelSizeExponent} />
     </>
   );
 }
@@ -86,10 +88,23 @@ function ShowEdgesCheckbox(props: { setShowEdges: (checked: boolean) => void }) 
   );
 }
 
-function PixelSizeInput() {
+function PixelSizeInput(props: { pixelSizeExponent: number, setPixelSizeExponent: (size: number) => void }) {
   return (
     <label>
-      Pixel size: 2^<input id="pixel-size" type="number" value="-1" min="-2" max="9" />
+      Pixel size: 2^<input
+        class="pixel-size-input"
+        type="number"
+        value={props.pixelSizeExponent}
+        min="-2"
+        max="9"
+        onChange={(e) => {
+          let size = +e.currentTarget.value;
+          if (size < -2 || size > 9 || !Number.isInteger(size)) {
+            size = props.pixelSizeExponent;
+          }
+          props.setPixelSizeExponent(size);
+          this.forceUpdate();
+        }} />
     </label>
   )
 }
