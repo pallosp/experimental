@@ -3,7 +3,7 @@ import {Component, ComponentChildren, createRef} from 'preact';
 
 import {Function2D} from './functions';
 
-export interface PlotConfig<T> {
+export interface PlotConfig<T = unknown> {
   func: Function2D<T>;
   sampleSpacing: number;
   zoom: number;
@@ -19,7 +19,7 @@ export interface Stats extends ComputeStats {
 }
 
 interface Props {
-  config: PlotConfig<unknown>;
+  config: PlotConfig;
   showEdges: boolean;
   viewportPixelSize: number;
   onUpdate: (stats: Stats) => void;
@@ -29,18 +29,14 @@ export class SvgPlot extends Component<Props> {
   svgRef = createRef<SVGSVGElement>();
   contentRef = createRef<SVGGElement>();
 
-  constructor(props: Props) {
-    super(props);
-  }
-
   private zoom(): number {
     return this.props.config.zoom;
   }
 
   private domain(): Rect {
     const el = this.svgRef.current;
-    const width = el.clientWidth / this.zoom();
-    const height = el.clientHeight / this.zoom();
+    const width = (el?.clientWidth ?? 0) / this.zoom();
+    const height = (el?.clientHeight ?? 0) / this.zoom();
     return {x: -width / 2, y: -height / 2, width, height};
   }
 
@@ -48,72 +44,136 @@ export class SvgPlot extends Component<Props> {
     return this.props.viewportPixelSize / this.zoom();
   }
 
-  private updatePlot() {
+  override render(props: Props): ComponentChildren {
     const domain = this.domain();
-    const config = this.props.config;
-    const plot = new Plot(config.func).compute(
-      domain,
-      config.sampleSpacing,
-      this.domainPixelSize()
+    return (
+      <svg ref={this.svgRef}>
+        {domain.width > 0 && (
+          <g transform={`scale(${this.zoom()}) translate(${-domain.x}, ${-domain.y})`}>
+            <SvgPlotContent
+              func={props.config.func}
+              domain={domain}
+              sampleSpacing={props.config.sampleSpacing}
+              pixelSize={this.domainPixelSize()}
+              addStyles={props.config.addStyles}
+              showEdges={props.showEdges}
+              onUpdate={props.onUpdate}
+            />
+          </g>
+        )}
+      </svg>
     );
+  }
 
+  override componentDidMount(): void {
+    this.forceUpdate();
+  }
+}
+
+interface ContentProps<T = unknown> {
+  func: (x: number, y: number) => T;
+  domain: Rect;
+  sampleSpacing: number;
+  pixelSize: number;
+  showEdges: boolean;
+  addStyles: (el: SVGGraphicsElement, value: T) => void;
+  onUpdate: (stats: Stats) => void;
+}
+
+class SvgPlotContent extends Component<ContentProps> {
+  private plot: Plot<unknown>;
+
+  private rootRef = createRef();
+
+  constructor(props: ContentProps) {
+    super(props);
+    this.plot = new Plot(props.func);
+  }
+
+  override render(): ComponentChildren {
+    return <g ref={this.rootRef} />;
+  }
+
+  private shouldRecompute(
+    prevProps: Readonly<ContentProps>,
+    nextProps: Readonly<ContentProps>
+  ): boolean {
+    return (
+      prevProps.func !== nextProps.func ||
+      prevProps.sampleSpacing !== nextProps.sampleSpacing ||
+      prevProps.pixelSize !== nextProps.pixelSize ||
+      !containsRect(this.plot.domain(), nextProps.domain)
+    );
+  }
+
+  private recompute() {
+    const {domain, sampleSpacing, pixelSize} = this.props;
+    this.plot.compute(domain, sampleSpacing, pixelSize);
+  }
+
+  override shouldComponentUpdate(nextProps: Readonly<ContentProps>): boolean {
+    return (
+      this.props.func !== nextProps.func ||
+      this.props.showEdges !== nextProps.showEdges ||
+      this.props.addStyles !== nextProps.addStyles ||
+      this.shouldRecompute(this.props, nextProps)
+    );
+  }
+
+  private updateView() {
+    const {addStyles, onUpdate} = this.props;
     const buildSvgStartMs = Date.now();
     let svgElements: SVGGraphicsElement[];
     let squareCount = 0;
     let runCount = 0;
     let drawStartMs: number;
     if (this.props.showEdges) {
-      const squares = plot.squares();
+      const squares = this.plot.squares();
       drawStartMs = Date.now();
       squareCount = squares.length;
-      svgElements = squaresToSvg(squares, config.addStyles, {edges: true});
+      svgElements = squaresToSvg(squares, addStyles, {edges: true});
     } else {
-      const runs = plot.runs();
+      const runs = this.plot.runs();
       drawStartMs = Date.now();
       runCount = runs.length;
-      svgElements = runsToSvg(runs, config.addStyles);
+      svgElements = runsToSvg(runs, addStyles);
     }
 
-    const content = this.contentRef.current;
-    content.setAttribute(
-      'transform',
-      `scale(${this.zoom()}) translate(${-domain.x}, ${-domain.y})`
-    );
+    const content = this.rootRef.current;
     content.textContent = '';
     content.append(...svgElements);
 
-    this.props.onUpdate({
-      ...plot.computeStats(),
+    onUpdate({
+      ...this.plot.computeStats(),
       squareCount,
       runCount,
-      svgSize: this.svgRef.current.outerHTML.length,
+      svgSize: content.outerHTML.length,
       buildSvgMs: drawStartMs - buildSvgStartMs,
       drawMs: Date.now() - drawStartMs
     });
   }
 
-  override shouldComponentUpdate(nextProps: Readonly<Props>): boolean {
-    const props = this.props;
-    return (
-      props.config.func !== nextProps.config.func ||
-      props.showEdges !== nextProps.showEdges ||
-      props.viewportPixelSize !== nextProps.viewportPixelSize
-    );
+  override componentDidMount() {
+    this.recompute();
+    this.updateView();
   }
 
-  override render(): ComponentChildren {
-    return (
-      <svg ref={this.svgRef}>
-        <g ref={this.contentRef} />
-      </svg>
-    );
+  override componentDidUpdate(prevProps: Readonly<ContentProps>): void {
+    if (this.props.func !== prevProps.func) {
+      this.plot = new Plot(this.props.func);
+    }
+    if (this.shouldRecompute(prevProps, this.props)) {
+      this.recompute();
+    }
+    this.updateView();
   }
+}
 
-  override componentDidMount(): void {
-    this.updatePlot();
-  }
-
-  override componentDidUpdate(): void {
-    this.updatePlot();
-  }
+function containsRect(r1: Rect, r2: Rect) {
+  return (
+    r2.x >= r1.x &&
+    r2.y >= r1.y &&
+    r2.x + r2.width <= r1.x + r1.width &&
+    r2.y + r2.height <= r1.y + r1.height
+  );
 }
