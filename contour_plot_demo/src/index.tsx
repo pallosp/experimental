@@ -11,7 +11,7 @@ function linePlot(): PlotConfig<boolean> {
     func: randomLines(),
     sampleSpacing: 0.5,
     zoom: 64,
-    addStyles: (el, value) => el.classList.add(value ? 'line' : 'background')
+    addStyles: (el, value) => el.classList.add(value ? 'line' : 'line-background')
   };
 }
 

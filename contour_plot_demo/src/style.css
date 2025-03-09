@@ -36,12 +36,12 @@ label {
   white-space: nowrap;
 }
 
-.background,
+.line,
 .outside {
   stroke: #f0f0f0;
 }
 
-.line,
+.line-background,
 .perimeter {
   stroke: royalblue;
 }
