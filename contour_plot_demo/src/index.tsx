@@ -55,26 +55,30 @@ export function App() {
 
   return (
     <>
-      <p>
+      <header>
         <FunctionButton text="Lines" onclick={() => setPlotConfig(linePlot)} />
         <FunctionButton text="Circles" onclick={() => setPlotConfig(circlePlot)} />
         <FunctionButton text="Mandelbrot set" onclick={() => setPlotConfig(mandelbrotPlot)} />
         <FunctionButton text="sin x + cos y" onclick={() => setPlotConfig(sinCosPlot)} />
+        &emsp;
         <ShowEdgesCheckbox setShowEdges={setShowEdges} />
+        &emsp;
         <PixelSizeInput
           pixelSizeExponent={pixelSizeExponent}
           setPixelSizeExponent={setPixelSizeExponent}
         />
-      </p>
-      <p>
+      </header>
+      <main>
+        <SvgPlot
+          config={plotConfig}
+          showEdges={showEdges}
+          viewportPixelSize={2 ** pixelSizeExponent}
+          onUpdate={(s) => setStats(s)}
+        />
+      </main>
+      <footer>
         <PlotStats stats={stats} />
-      </p>
-      <SvgPlot
-        config={plotConfig}
-        showEdges={showEdges}
-        viewportPixelSize={2 ** pixelSizeExponent}
-        onUpdate={(s) => setStats(s)}
-      />
+      </footer>
     </>
   );
 }
