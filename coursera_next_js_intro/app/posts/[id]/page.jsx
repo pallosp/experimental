@@ -1,4 +1,5 @@
 import { posts } from "../../data/posts";
+import NavLayout from "../../navigation";
 import styles from "./post.module.css";
 
 export default async function Posts({ params }) {
@@ -10,9 +11,11 @@ export default async function Posts({ params }) {
   }
 
   return (
-    <main className={styles.container}>
-      <h1 className={styles.title}>{post.title}</h1>
-      <p className={styles.content}>{post.content}</p>
-    </main>
+    <NavLayout>
+      <main className={styles.container}>
+        <h1 className={styles.title}>{post.title}</h1>
+        <p className={styles.content}>{post.content}</p>
+      </main>
+    </NavLayout>
   );
 }
