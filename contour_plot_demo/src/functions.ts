@@ -11,7 +11,6 @@ function linePointDistance([a, b, c]: [number, number, number], x: number, y: nu
 export function randomLines(): Function2D<boolean> {
   const lines: Array<[number, number, number]> = [];
   for (let i = 0; i < 10; i++) {
-    
     lines.push([random(-5, 5), random(-5, 5), random(-25, 25)]);
   }
   return (x, y) => lines.some((line, i) => linePointDistance(line, x, y) < 0.12 / (i + 3));
