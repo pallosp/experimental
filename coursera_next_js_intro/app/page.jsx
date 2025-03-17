@@ -10,6 +10,10 @@ export default function Home() {
       <Link href="/posts/1">Go to Post 1</Link>
       <br />
       <Link href="/posts/2">Go to Post 2</Link>
+      <p>
+        API key:{" "}
+        {process.env.DEMO_API_KEY ?? `(add DEMO_API_KEY=... to /.env.local)`}
+      </p>
     </NavLayout>
   );
 }
