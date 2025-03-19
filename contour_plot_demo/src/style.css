@@ -3,10 +3,15 @@ body {
   color: #222;
   display: flex;
   flex-direction: column;
-  font: 14px Arial;
   height: 100vh;
-  padding: 10px 16px 16px 16px;
+  padding: 16px;
   margin: 0;
+}
+
+header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1ex 3ex;
 }
 
 main {
@@ -14,32 +19,12 @@ main {
   margin: 16px 0 8px 0;
 }
 
-footer {
-  font-size: 13px;
-}
-
-svg {
+.svg-plot {
   border: 1px solid grey;
   border-radius: 4px;
   box-sizing: border-box;
   height: 100%;
   width: 100%;
-}
-
-button,
-label {
-  display: inline-block;
-  line-height: 18px;
-  margin-top: 6px;
-  white-space: nowrap;
-}
-
-button + button {
-  margin-left: 0.5em;
-}
-
-.pixel-size {
-  width: 2.5em;
 }
 
 .stats-item {

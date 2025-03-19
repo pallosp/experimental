@@ -16,6 +16,10 @@
     "importOrder": ["", "", "^[./]"]
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@fontsource/roboto": "^5.2.5",
+    "@mui/material": "^6.4.8",
     "contour-plot-svg": "^2.0.3",
     "preact": "^10.26.4"
   },

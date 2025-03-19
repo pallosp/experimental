@@ -1,9 +1,18 @@
+import {
+  Button,
+  ButtonGroup,
+  Checkbox,
+  FormControlLabel,
+  TextField,
+  Typography
+} from '@mui/material';
 import {render} from 'preact';
-import {useState} from 'preact/hooks';
+import {useEffect, useRef, useState} from 'preact/hooks';
 
 import {mandelbrot, randomCircles, randomLines, sinCos} from './functions';
 import {PlotConfig, Stats, SvgPlot} from './svg_plot';
 
+import '@fontsource/roboto/400.css';
 import './style.css';
 
 function linePlot(): PlotConfig<boolean> {
@@ -49,20 +58,42 @@ function mandelbrotPlot(): PlotConfig<number> {
 
 export function App() {
   const [plotConfig, setPlotConfig] = useState<PlotConfig<unknown>>(linePlot());
+  const [plotIndex, setPlotIndex] = useState(0);
   const [showEdges, setShowEdges] = useState(false);
   const [pixelSizeExponent, setPixelSizeExponent] = useState(devicePixelRatio > 1 ? -1 : 0);
   const [stats, setStats] = useState<Stats | undefined>();
 
+  function setPlot(index: number, plotConfig: PlotConfig<unknown>) {
+    setPlotIndex(index);
+    setPlotConfig(plotConfig);
+  }
+
   return (
     <>
       <header>
-        <FunctionButton text="Lines" onclick={() => setPlotConfig(linePlot)} />
-        <FunctionButton text="Circles" onclick={() => setPlotConfig(circlePlot)} />
-        <FunctionButton text="Mandelbrot set" onclick={() => setPlotConfig(mandelbrotPlot)} />
-        <FunctionButton text="sin x + cos y" onclick={() => setPlotConfig(sinCosPlot)} />
-        &emsp;
+        <ButtonGroup variant="outlined" sx={{height: '36px'}}>
+          <FunctionButton
+            text="Lines"
+            selected={plotIndex === 0}
+            onclick={() => setPlot(0, linePlot())}
+          />
+          <FunctionButton
+            text="Circles"
+            selected={plotIndex === 1}
+            onclick={() => setPlot(1, circlePlot())}
+          />
+          <FunctionButton
+            text="Mandelbrot set"
+            selected={plotIndex === 2}
+            onclick={() => setPlot(2, mandelbrotPlot())}
+          />
+          <FunctionButton
+            text="sin x + cos y"
+            selected={plotIndex === 3}
+            onclick={() => setPlot(3, sinCosPlot())}
+          />
+        </ButtonGroup>
         <ShowEdgesCheckbox setShowEdges={setShowEdges} />
-        &emsp;
         <PixelSizeInput
           pixelSizeExponent={pixelSizeExponent}
           setPixelSizeExponent={setPixelSizeExponent}
@@ -73,6 +104,7 @@ export function App() {
           config={plotConfig}
           showEdges={showEdges}
           viewportPixelSize={2 ** pixelSizeExponent}
+          className="svg-plot"
           onUpdate={(s) => setStats(s)}
         />
       </main>
@@ -83,20 +115,26 @@ export function App() {
   );
 }
 
-function FunctionButton(props: {text: string; onclick: () => void}) {
-  return <button onClick={props.onclick}>{props.text}</button>;
+function FunctionButton(props: {text: string; selected: boolean; onclick: () => void}) {
+  return (
+    <Button variant={props.selected ? 'contained' : 'outlined'} onClick={props.onclick}>
+      <Typography sx={{textTransform: 'none', whiteSpace: 'nowrap'}}>{props.text}</Typography>
+    </Button>
+  );
 }
 
 function ShowEdgesCheckbox(props: {setShowEdges: (checked: boolean) => void}) {
   return (
-    <label>
-      <input
-        id="show-edges"
-        type="checkbox"
-        onChange={(e) => props.setShowEdges(e.currentTarget.checked)}
-      />
-      &thinsp;Show edges
-    </label>
+    <FormControlLabel
+      control={
+        <Checkbox
+          sx={{height: '36px'}}
+          onChange={(e) => props.setShowEdges((e.currentTarget as HTMLInputElement).checked)}
+        />
+      }
+      label="Show edges"
+      sx={{margin: 0}}
+    />
   );
 }
 
@@ -104,31 +142,41 @@ function PixelSizeInput(props: {
   pixelSizeExponent: number;
   setPixelSizeExponent: (size: number) => void;
 }) {
+  const inputRef = useRef<HTMLInputElement>();
+  useEffect(() => {
+    const input = inputRef.current;
+    input.onchange = () => {
+      let size = +input.value;
+      if (size < -2 || size > 9 || !Number.isInteger(size)) {
+        size = props.pixelSizeExponent;
+      }
+      props.setPixelSizeExponent(size);
+      this.forceUpdate();
+    };
+  });
+
   return (
-    <label>
-      Pixel size: 2^
-      <input
-        class="pixel-size-input"
-        type="number"
-        value={props.pixelSizeExponent}
-        min="-2"
-        max="9"
-        onChange={(e) => {
-          let size = +e.currentTarget.value;
-          if (size < -2 || size > 9 || !Number.isInteger(size)) {
-            size = props.pixelSizeExponent;
-          }
-          props.setPixelSizeExponent(size);
-          this.forceUpdate();
-        }}
-      />
-    </label>
+    <FormControlLabel
+      label="Pixel size: 2^"
+      labelPlacement="start"
+      control={
+        <TextField
+          inputRef={inputRef}
+          type="number"
+          value={props.pixelSizeExponent}
+          variant="outlined"
+          slotProps={{htmlInput: {min: -2, max: 9, step: 1}}}
+          sx={{'& .MuiInputBase-input': {height: '36px', boxSizing: 'border-box'}}}
+        />
+      }
+      sx={{margin: 0}}
+    ></FormControlLabel>
   );
 }
 
 function PlotStats(props: {stats: Stats | undefined}) {
   const stats = props.stats;
-  if (!stats) return '…';
+  if (!stats) return <Typography variant="caption">…</Typography>;
 
   const pixelsPerEval = stats.newArea / stats.newCalls;
   const computeStats =
@@ -147,9 +195,9 @@ function PlotStats(props: {stats: Stats | undefined}) {
   );
   const svgStats = <span class="stats-item">SVG size: {Math.round(stats.svgSize / 1024)} KiB</span>;
   return (
-    <>
+    <Typography variant="caption">
       {computeStats} {renderStats} {svgStats}
-    </>
+    </Typography>
   );
 }
 
