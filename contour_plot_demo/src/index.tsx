@@ -12,7 +12,7 @@ import {useEffect, useRef, useState} from 'preact/hooks';
 import {mandelbrot, randomCircles, randomLines, sinCos} from './functions';
 import {PlotConfig, Stats, SvgPlot} from './svg_plot';
 
-import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/latin-400.css';
 import './style.css';
 
 function linePlot(): PlotConfig<boolean> {
