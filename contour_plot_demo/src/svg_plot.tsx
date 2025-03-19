@@ -23,6 +23,7 @@ interface Props {
   showEdges: boolean;
   viewportPixelSize: number;
   onUpdate: (stats: Stats) => void;
+  className?: string;
 }
 
 export class SvgPlot extends Component<Props> {
@@ -47,7 +48,7 @@ export class SvgPlot extends Component<Props> {
   override render(props: Props): ComponentChildren {
     const domain = this.domain();
     return (
-      <svg ref={this.svgRef}>
+      <svg ref={this.svgRef} className={props.className}>
         {domain.width > 0 && (
           <g transform={`scale(${this.zoom()}) translate(${-domain.x}, ${-domain.y})`}>
             <SvgPlotContent
