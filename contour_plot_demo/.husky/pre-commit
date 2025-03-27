@@ -1,4 +1,6 @@
 set -o errexit
 
+cd contour_plot_demo
+
 npx tsc
 npx eslint
