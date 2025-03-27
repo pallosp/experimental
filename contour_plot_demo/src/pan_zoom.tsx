@@ -77,7 +77,6 @@ export class PanZoom extends Component<Props, State> {
   }
 
   private onResize() {
-    console.log('onResize');
     this.forceUpdate();
   }
 
