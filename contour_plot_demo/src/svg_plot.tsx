@@ -19,6 +19,9 @@ export interface Stats extends ComputeStats {
 }
 
 interface Props {
+  offsetX?: number;
+  offsetY?: number;
+  volatile?: boolean;
   config: PlotConfig;
   showEdges: boolean;
   viewportPixelSize: number;
@@ -27,8 +30,8 @@ interface Props {
 }
 
 export class SvgPlot extends Component<Props> {
-  svgRef = createRef<SVGSVGElement>();
-  contentRef = createRef<SVGGElement>();
+  private svgRef = createRef<SVGSVGElement>();
+  private computedDomain: Rect = new DOMRect();
 
   private zoom(): number {
     return this.props.config.zoom;
@@ -36,9 +39,16 @@ export class SvgPlot extends Component<Props> {
 
   private domain(): Rect {
     const el = this.svgRef.current;
-    const width = (el?.clientWidth ?? 0) / this.zoom();
-    const height = (el?.clientHeight ?? 0) / this.zoom();
-    return {x: -width / 2, y: -height / 2, width, height};
+    const zoom = this.zoom();
+    const width = (el?.clientWidth ?? 0) / zoom;
+    const height = (el?.clientHeight ?? 0) / zoom;
+    const {offsetX, offsetY} = this.props;
+    return {
+      x: -width / 2 - (offsetX ?? 0) / zoom,
+      y: -height / 2 - (offsetY ?? 0) / zoom,
+      width,
+      height
+    };
   }
 
   private domainPixelSize(): number {
@@ -47,13 +57,16 @@ export class SvgPlot extends Component<Props> {
 
   override render(props: Props): ComponentChildren {
     const domain = this.domain();
+    if (!props.volatile) {
+      this.computedDomain = domain;
+    }
     return (
       <svg ref={this.svgRef} className={props.className}>
         {domain.width > 0 && (
           <g transform={`scale(${this.zoom()}) translate(${-domain.x}, ${-domain.y})`}>
             <SvgPlotContent
               func={props.config.func}
-              domain={domain}
+              domain={this.computedDomain}
               sampleSpacing={props.config.sampleSpacing}
               pixelSize={this.domainPixelSize()}
               addStyles={props.config.addStyles}

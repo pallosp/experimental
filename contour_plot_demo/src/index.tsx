@@ -15,6 +15,8 @@ import {PlotConfig, Stats, SvgPlot} from './svg_plot';
 import '@fontsource/roboto/latin-400.css';
 import './style.css';
 
+import {PanZoom} from './pan_zoom';
+
 function linePlot(): PlotConfig<boolean> {
   return {
     func: randomLines(),
@@ -100,13 +102,20 @@ export function App() {
         />
       </header>
       <main>
-        <SvgPlot
-          config={plotConfig}
-          showEdges={showEdges}
-          viewportPixelSize={2 ** pixelSizeExponent}
-          className="svg-plot"
-          onUpdate={(s) => setStats(s)}
-        />
+        <PanZoom className="svg-plot-wrapper" initialZoom={plotConfig.zoom}>
+          {({offsetX, offsetY, volatile}) => (
+            <SvgPlot
+              offsetX={offsetX}
+              offsetY={offsetY}
+              volatile={volatile}
+              config={plotConfig}
+              showEdges={showEdges}
+              viewportPixelSize={2 ** pixelSizeExponent}
+              className="svg-plot"
+              onUpdate={(s) => setStats(s)}
+            />
+          )}
+        </PanZoom>
       </main>
       <footer>
         <PlotStats stats={stats} />

@@ -19,6 +19,11 @@ main {
   margin: 16px 0 8px 0;
 }
 
+.svg-plot-wrapper {
+  height: 100%;
+  width: 100%;
+}
+
 .svg-plot {
   border: 1px solid grey;
   border-radius: 4px;
