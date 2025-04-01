@@ -1,7 +1,7 @@
 from sympy import Matrix
 
-from ..lib.matrix import IsScalarMultiple
-from ..lib.circle import Circle
+from lib.matrix import IsScalarMultiple
+from lib.circle import Circle
 
 
 def test_circle():

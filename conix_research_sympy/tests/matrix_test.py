@@ -1,6 +1,6 @@
 from sympy import Matrix
 
-from ..lib.matrix import IsScalarMultiple
+from lib.matrix import IsScalarMultiple
 
 
 class TestIsScalarMultiple:
