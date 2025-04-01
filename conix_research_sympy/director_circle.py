@@ -15,14 +15,16 @@ init_printing(use_unicode=True)
 
 
 def Circle(x, y, r_square):
-  return Matrix([
-      [-1, 0, x],
-      [0, -1, y],
-      [x, y, r_square - x * x - y * y],
-  ])
+    return Matrix(
+        [
+            [-1, 0, x],
+            [0, -1, y],
+            [x, y, r_square - x * x - y * y],
+        ]
+    )
 
 
-a, b, c, d, e, f = symbols('a,b,c,d,e,f')
+a, b, c, d, e, f = symbols("a,b,c,d,e,f")
 conic = Matrix([[a, b, d], [b, c, e], [d, e, f]])
 disc = a * c - b * b
 # √(semi-major axis**2 + semi-minor axis**2)
@@ -32,6 +34,6 @@ center_y = (b * d - a * e) / disc
 director_circle = Circle(center_x, center_y, r_square)
 
 for i in range(9):
-  director_circle[i] = factor(director_circle[i] * disc)
+    director_circle[i] = factor(director_circle[i] * disc)
 
 pprint(director_circle)
