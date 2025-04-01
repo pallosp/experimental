@@ -11,17 +11,9 @@ from sympy import Matrix
 from sympy import pprint
 from sympy import symbols
 
+from lib.circle import Circle
+
 init_printing(use_unicode=True)
-
-
-def Circle(x, y, r_square):
-    return Matrix(
-        [
-            [-1, 0, x],
-            [0, -1, y],
-            [x, y, r_square - x * x - y * y],
-        ]
-    )
 
 
 a, b, c, d, e, f = symbols("a,b,c,d,e,f")
